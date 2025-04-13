@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>cors跨域问题的解决(简单请求)</title>
+  </head>
+  <body>
+    <button onclick="getStudents()">Get简单请求</button>
+    <button onclick="getStudents1()">Get复杂请求</button>
+    <script type="text/javascript">
+      const getStudents = async () => {
+        const url = 'http://localhost:8081/students'
+        const result = await fetch(url)
+        const data = await result.json()
+        console.log(data)
+      }
+      async function getStudents1() {
+        const url = 'http://localhost:8081/students'
+        const result = await fetch(url, {
+          method: 'GET',
+          headers: {
+            School: 'shangguigu',
+            city: 'shanghai',
+          },
+        })
+        const data = await result.json()
+        console.log(data)
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>jsonp解决跨域</title>
+  </head>
+  <body>
+    <button onclick="getTeacherList()">jsonp</button>
+    <script type="text/javascript">
+      function callback(data) {
+        console.log('jsonp', data)
+      }
+      function getTeacherList() {
+        const script = document.createElement('script')
+        script.onload = () => {
+          script.remove()
+        }
+        script.src = 'http://127.0.0.1:8081/teachers'
+        document.body.appendChild(script)
+      }
+      // const script = document.createElement('script')
+      // script.src = 'http://127.0.0.1:8081/teachers'
+      // document.body.appendChild(script)
+    </script>
+    <!-- <script
+      type="text/javascript"
+      src="http://127.0.0.1:8081/teachers?callback=callback&t="
+      +
+      new
+      Date().getTime();
+    ></script> -->
+  </body>
+</html>
