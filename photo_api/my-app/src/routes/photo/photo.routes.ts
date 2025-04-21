@@ -1,5 +1,9 @@
 import {
+  ImageIdParamsSchema,
+  insertPhotoSchema,
+  keywordParamsSchema,
   loginSchema,
+  patchImageInfoSchema,
   patchUserInfoSchema,
   registerSchema,
   selectPhotoSchema,
@@ -123,6 +127,74 @@ export const uploadImage = createRoute({
   path: '/photo/upload',
   tags,
   method: 'post',
-  request: {},
-  responses: {},
+  request: {
+    body: jsonContentRequired(insertPhotoSchema, 'The image to upload'),
+  },
+  responses: {
+    [HttpStatusCode.NO_CONTENT]: { description: 'Upload successfully' },
+    [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(insertPhotoSchema),
+      'The image is already exist'
+    ),
+  },
 })
+
+export type addImageRoute = typeof uploadImage
+export const deleteImage = createRoute({
+  path: '/photo/{id}',
+  tags,
+  method: 'delete',
+  request: {
+    params: ImageIdParamsSchema,
+  },
+  responses: {
+    [HttpStatusCode.NO_CONTENT]: { description: 'Delete successfully' },
+    [HttpStatusCode.NOT_FOUND]: jsonContent(
+      notFoundSchema,
+      'The image Id is not exist'
+    ),
+  },
+})
+export type deleteImageRoute = typeof deleteImage
+
+export const searchByTag = createRoute({
+  path: '/photo/{keyword}',
+  tags,
+  method: 'post',
+  request: {
+    params: keywordParamsSchema,
+  },
+  responses: {
+    [HttpStatusCode.OK]: jsonContent(
+      z.array(selectPhotoSchema),
+      'The list of images with the given tag'
+    ),
+    [HttpStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, 'No images found'),
+  },
+})
+export type searchByTagRoute = typeof searchByTag
+
+export const updateImageInfo = createRoute({
+  path: '/photo/update/{id}',
+  tags,
+  method: 'patch',
+  request: {
+    params: ImageIdParamsSchema,
+    body: jsonContentRequired(
+      patchImageInfoSchema,
+      'The updated image information'
+    ),
+  },
+  responses: {
+    [HttpStatusCode.NO_CONTENT]: { description: 'update successfully' },
+    [HttpStatusCode.NOT_FOUND]: jsonContent(
+      notFoundSchema,
+      'Image ID not found'
+    ),
+    [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(patchImageInfoSchema),
+      'The Image update information is invalid'
+    ),
+  },
+})
+export type updateImageInfoRoute = typeof updateImageInfo

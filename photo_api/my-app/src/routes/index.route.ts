@@ -8,6 +8,7 @@ import { z } from 'zod'
 import env from '../../env'
 const app = createRouter()
 
+
 app.openapi(
   createRoute({
     tags: ['Index'],

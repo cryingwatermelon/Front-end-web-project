@@ -50,15 +50,29 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes,
 })
+function isTokenExpired(token: string) {
+  if (!token) return true
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    const exp = payload.exp
+    const now = Math.floor(Date.now() / 1000) // 当前时间戳（秒）
+    return now > exp
+  } catch (e) {
+    console.error('Invalid token:', e)
+    return true // 无法解析的 token 认为已过期
+  }
+}
+
 router.beforeEach((to, _, next) => {
   if (to.matched.some(record => record.meta?.requiresAuth)) {
-    if (!localStorage.getItem('token')) {
+    const token = localStorage.getItem('token')
+    if (!token || isTokenExpired(token)) {
       next({
         path: '/login',
         query: { redirect: to.fullPath },
       })
-    }
-    else {
+    } else {
       next()
     }
   }

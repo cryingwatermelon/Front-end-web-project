@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import { nanoid } from 'nanoid'
 import * as z from 'zod'
 
 export const tasks = sqliteTable('tasks', {
@@ -84,11 +85,44 @@ export const patchUserInfoSchema = insertUserInfoSchema.partial()
 
 //bubu
 export const bubu = sqliteTable('bubu', {
-  id: text('id').notNull().unique(),
+  id: text('id')
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => nanoid(10)),
   name: text('name').notNull(),
   tags: text('tags'),
   source: text('source').notNull(),
   category: integer('category').notNull(),
 })
+export const yier = sqliteTable('yier', {
+  id: text('id').notNull().primaryKey().default(nanoid(10)),
+  name: text('name').notNull(),
+  tags: text('tags'),
+  source: text('source').notNull(),
+  category: integer('category').notNull().default(2),
+})
 
 export const selectPhotoSchema = createSelectSchema(bubu)
+
+export const insertPhotoSchema = createInsertSchema(bubu)
+  .required({
+    name: true,
+    source: true,
+    category: true,
+    tags: true,
+  })
+  .omit({ id: true })
+
+export const ImageIdParamsSchema = z.object({
+  id: z.string().length(10),
+})
+
+export const keywordParamsSchema = z.object({
+  keyword: z.string(),
+})
+
+// export const updatePhotoSchema = createInsertSchema(bubu)
+//   .partial()
+//   .omit({ category: true })
+export const patchImageInfoSchema = insertPhotoSchema.partial()
+ 

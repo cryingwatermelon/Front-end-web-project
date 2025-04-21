@@ -9,7 +9,7 @@ export interface loginInfo {
 export interface imageItem {
   id: string
   name: string
-  tag?: string[]
+  tags?: string[]
   source: string
   category: number
 }

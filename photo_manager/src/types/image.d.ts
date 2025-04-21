@@ -1,7 +1,9 @@
-export interface imageItem {
-  id: string
+export interface uploadItem {
   name: string
-  tags?: string
   source: string
+  tags: string
+}
+export interface imageItem extends uploadItem {
+  id?: string
   category: number
 }

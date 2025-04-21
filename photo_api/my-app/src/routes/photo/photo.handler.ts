@@ -1,15 +1,20 @@
 import { db } from '@/db'
-import { users } from '@/db/schema'
+import { bubu, users } from '@/db/schema'
 import type { AppRouteHandler } from '@/lib/types'
-import { eq } from 'drizzle-orm'
+import { eq, like } from 'drizzle-orm'
 import Jwt from 'jsonwebtoken'
+import { nanoid } from 'nanoid'
 import * as HttpStatusCode from 'stoker/http-status-codes'
 import env from '../../../env'
 import type {
+  addImageRoute,
   bubuListRoute,
+  deleteImageRoute,
   LoginRoute,
   patchUserInfoRoute,
   registerRoute,
+  searchByTagRoute,
+  updateImageInfoRoute,
   userInfoRoute,
 } from './photo.routes'
 
@@ -98,4 +103,64 @@ export const register: AppRouteHandler<registerRoute> = async (c) => {
 export const bubuList: AppRouteHandler<bubuListRoute> = async (c) => {
   const bubu = await db.query.bubu.findMany()
   return c.json(bubu, HttpStatusCode.OK)
+}
+
+export const addImage: AppRouteHandler<addImageRoute> = async (c) => {
+  const { name, source, category, tags } = c.req.valid('json')
+  const [image] = await db
+    .insert(bubu)
+    .values({ name, source, category, tags, id: nanoid(10) })
+    .returning()
+  if (!image) {
+    return c.json(
+      { message: 'Upload failed' },
+      HttpStatusCode.UNPROCESSABLE_ENTITY
+    )
+  }
+  return c.json(HttpStatusCode.NO_CONTENT)
+}
+
+export const deleteImage: AppRouteHandler<deleteImageRoute> = async (c) => {
+  const { id } = c.req.valid('param')
+  const [image] = await db.delete(bubu).where(eq(bubu.id, id)).returning()
+  if (!image) {
+    return c.json({ message: 'Delete failed' }, HttpStatusCode.NOT_FOUND)
+  }
+  return c.json(HttpStatusCode.NO_CONTENT)
+}
+
+export const searchImageByTag: AppRouteHandler<searchByTagRoute> = async (
+  c
+) => {
+  const { keyword } = c.req.valid('param')
+  const images = await db
+    .select()
+    .from(bubu)
+    .where(like(bubu.tags, `%${keyword}%`))
+  if (!images) {
+    return c.json({ message: 'Not found' }, HttpStatusCode.NOT_FOUND)
+  }
+  return c.json(images, HttpStatusCode.OK)
+}
+
+export const updateImageInfo: AppRouteHandler<updateImageInfoRoute> = async (
+  c
+) => {
+  const { id } = c.req.valid('param')
+  const update = c.req.valid('json')
+  if (!id) {
+    return c.json({ message: 'Id is not found' }, HttpStatusCode.NOT_FOUND)
+  }
+  const [image] = await db
+    .update(bubu)
+    .set(update)
+    .where(eq(bubu.id, id))
+    .returning()
+  if (!image) {
+    return c.json(
+      { message: 'Update failed' },
+      HttpStatusCode.UNPROCESSABLE_ENTITY
+    )
+  }
+  return c.json(HttpStatusCode.NO_CONTENT)
 }

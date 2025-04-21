@@ -97,6 +97,8 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response) => {
     if (response.status === 401) {
+      const router = useRouter()
+      router.push({ name: 'Login' }) // 重定向到登录页
       throw new Error('未授权')
     }
     if (response.status === 400) {
