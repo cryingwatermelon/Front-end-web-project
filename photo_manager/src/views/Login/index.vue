@@ -1,7 +1,6 @@
 <!-- eslint-disable no-console -->
 <script lang="ts" setup>
 import multiavatar from '@multiavatar/multiavatar/esm'
-import { AxiosError } from 'axios'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
@@ -36,28 +35,52 @@ async function onSubmit(formEl: FormInstance | undefined) {
   if (!formEl) {
     return
   }
-  await formEl.validate((valid, fields) => {
-    if (valid) {
-      console.log('submit login form')
-    }
-    else {
-      console.log('error submit!', fields)
-    }
-  })
+
+  // // login request
+  // try {
+  //   // username password validate
+  //   await formEl.validate((valid, fields) => {
+  //     if (!valid) {
+  //       throw new Error('用户名或密码错误', fields)
+  //     }
+  //     const result = await login(ruleForm)
+  //     console.log('result', result)
+  //     const userStore = useUserStore()
+  //     userStore.saveToken(result?.data?.token)
+  //     router.push(route.query.redirect as string || '/home/bubu')
+  //   })
+  // }
+  // catch (error) {
+  //   if (error instanceof AxiosError) {
+  //     console.error(error)
+  //     ElMessage({
+  //       type: 'error',
+  //       message: error.response!.data.message,
+  //     })
+  //   }
+  // }
   try {
+    const valid = await formEl.validate()
+    if (!valid) {
+      // throw new Error('用户名或密码错误')
+      throw new Error('用户名或密码错误')
+    }
     const result = await login(ruleForm)
-    console.log('result', result)
     const userStore = useUserStore()
     userStore.saveToken(result?.data?.token)
-    await router.push(route.query.redirect as string || '/')
-    console.log('test')
+    router.push((route.query.redirect as string) || '/home/bubu')
   }
   catch (error) {
-    if (error instanceof AxiosError) {
-      console.error(error)
+    if (error) {
       ElMessage({
         type: 'error',
-        message: error.response!.data.message,
+        message: error instanceof Error ? error.message : '用户名或密码错误',
+      })
+    }
+    else {
+      ElMessage({
+        type: 'error',
+        message: '未知错误',
       })
     }
   }

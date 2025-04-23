@@ -29,7 +29,7 @@ function handleCollapse() {
       </div>
     </div>
     <el-menu
-      default-active="1-1"
+      default-active="1"
       :collapse="isCollapse"
       router
       @open="handleOpen"

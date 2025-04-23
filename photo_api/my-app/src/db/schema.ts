@@ -90,7 +90,10 @@ export const bubu = sqliteTable('bubu', {
     .primaryKey()
     .$defaultFn(() => nanoid(10)),
   name: text('name').notNull(),
-  tags: text('tags'),
+  tags: text('tags')
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'`),
   source: text('source').notNull(),
   category: integer('category').notNull(),
 })
