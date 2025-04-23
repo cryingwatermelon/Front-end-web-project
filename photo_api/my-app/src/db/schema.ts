@@ -90,10 +90,7 @@ export const bubu = sqliteTable('bubu', {
     .primaryKey()
     .$defaultFn(() => nanoid(10)),
   name: text('name').notNull(),
-  tags: text('tags')
-    .$type<string[]>()
-    .notNull()
-    .default(sql`'[]'`),
+  tags: text('tags').notNull(),
   source: text('source').notNull(),
   category: integer('category').notNull(),
 })
@@ -106,15 +103,17 @@ export const yier = sqliteTable('yier', {
 })
 
 export const selectPhotoSchema = createSelectSchema(bubu)
+  .transform((data) => ({
+    ...data,
+    tags: JSON.parse(data.tags),
+  }))
 
-export const insertPhotoSchema = createInsertSchema(bubu)
-  .required({
-    name: true,
-    source: true,
-    category: true,
-    tags: true,
-  })
-  .omit({ id: true })
+export const insertPhotoSchema = z.object({
+  name: z.string().min(1),
+  source: z.string().min(1),
+  category: z.number().min(1),
+  tags: z.array(z.string()).min(1),
+})
 
 export const ImageIdParamsSchema = z.object({
   id: z.string().length(10),
@@ -128,4 +127,3 @@ export const keywordParamsSchema = z.object({
 //   .partial()
 //   .omit({ category: true })
 export const patchImageInfoSchema = insertPhotoSchema.partial()
- 

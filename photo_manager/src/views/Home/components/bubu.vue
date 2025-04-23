@@ -14,14 +14,13 @@ const inputValue = ref('')
 const inputVisible = ref(false)
 const showList = ref<imageItem[]>([])
 const searchList = ref<imageItem[]>([])
-
+const imageOperationRef = ref<InstanceType<typeof ImageOperation>>()
 async function getBubuList() {
   const list: ResponseType<imageItem[]> = await getBubuImageList()
   showList.value = list.data
   console.log('showList', showList)
   for (let i = 0; i < showList.value.length; i++) {
     const item = showList.value[i]
-    console.log(JSON.parse(item.tags))
   }
 }
 
@@ -55,33 +54,30 @@ const editImageItem = ref<imageItem>({
   tags: '',
   category: 1,
 })
-function handleEdit(index: number) {
-  isEdit.value = !isEdit.value
-  editImageItem.value.category = showList.value[index].category
-  editImageItem.value.name = showList.value[index].name
-  editImageItem.value.source = showList.value[index].source
-  editImageItem.value.tags = showList.value[index].tags
-  editImageItem.value.id = showList.value[index].id
-}
+// function handleEdit(index: number) {
+//   isEdit.value = !isEdit.value
+//   editImageItem.value.category = showList.value[index].category
+//   editImageItem.value.name = showList.value[index].name
+//   editImageItem.value.source = showList.value[index].source
+//   editImageItem.value.tags = showList.value[index].tags
+//   editImageItem.value.id = showList.value[index].id
+// }
 async function updateImageInfo(id: string, form: uploadItem) {
   isEdit.value = !isEdit.value
   await editImage(id, form)
   getBubuList()
 }
-function parseArray(value: string): string[] {
-  try {
-    return JSON.parse(value)
-  }
-  catch {
-    return []
-  }
-}
+
 const title = ref('')
 const tagType = ref<string[]>(['primary', 'success', 'info', 'warning', 'danger'])
-const operation = ref(false)
+
 function handleAdd() {
   title.value = '添加'
-  operation.value = true
+  imageOperationRef.value?.open()
+}
+function handleEdit(image: imageItem) {
+  title.value = '编辑'
+  imageOperationRef.value?.open(image)
 }
 </script>
 
@@ -123,10 +119,10 @@ function handleAdd() {
           <div class="font-semibold text-pink-500">
             {{ image.name }}
           </div>
-          <button><Icon :height="24" icon="material-symbols:edit-square-outline" class="text-yellow-600" @click="title = '编辑'" /></button>
+          <button><Icon :height="24" icon="material-symbols:edit-square-outline" class="text-yellow-600" @click="handleEdit(image)" /></button>
         </div>
         <div v-if="image.tags" class="flex flex-wrap gap-2 mb-2">
-          <el-tag v-for="(tag, tagIndex) in parseArray(image.tags)" :key="tag" :type="tagType[tagIndex % 4]">
+          <el-tag v-for="(tag, tagIndex) in image.tags" :key="tag" :type="tagType[tagIndex % 4]">
             {{ tag }}
           </el-tag>
         </div>
@@ -135,7 +131,8 @@ function handleAdd() {
     <div v-else>
       <span>No Search Result</span>
     </div>
-    <ImageOperation :operation="operation" :title="title" :image="editImageItem" @upload-new-image="uploadNewImage" />
+
+    <ImageOperation ref="imageOperationRef" @update-image="uploadNewImage" />
   </div>
 </template>
 

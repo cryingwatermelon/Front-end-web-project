@@ -102,14 +102,21 @@ export const register: AppRouteHandler<registerRoute> = async (c) => {
 
 export const bubuList: AppRouteHandler<bubuListRoute> = async (c) => {
   const bubu = await db.query.bubu.findMany()
-  return c.json(bubu, HttpStatusCode.OK)
+  const data = bubu.map((item) => {
+    return {
+      ...item,
+      tags: JSON.parse(item.tags) as string[],
+    }
+  })
+  return c.json(data, HttpStatusCode.OK)
 }
 
 export const addImage: AppRouteHandler<addImageRoute> = async (c) => {
   const { name, source, category, tags } = c.req.valid('json')
+  const tagsString = JSON.stringify(tags)
   const [image] = await db
     .insert(bubu)
-    .values({ name, source, category, tags, id: nanoid(10) })
+    .values({ name, source, category, tags: tagsString, id: nanoid(10) })
     .returning()
   if (!image) {
     return c.json(
@@ -153,7 +160,10 @@ export const updateImageInfo: AppRouteHandler<updateImageInfoRoute> = async (
   }
   const [image] = await db
     .update(bubu)
-    .set(update)
+    .set({
+      ...update,
+      tags: JSON.stringify(update.tags),
+    })
     .where(eq(bubu.id, id))
     .returning()
   if (!image) {

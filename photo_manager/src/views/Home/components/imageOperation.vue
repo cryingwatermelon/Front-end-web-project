@@ -2,23 +2,21 @@
 import type { imageItem } from '@/types/image'
 import type { InputInstance } from 'element-plus'
 
-const props = defineProps<{
-  operation: boolean
-  title: string
-  image?: imageItem
+defineEmits<{
+  (e: 'updateImage', image: imageItem): void
+  (e: 'addImage', image: imageItem): void
 }>()
-const emit = defineEmits(['updateImage', 'addImage'])
 
 const inputValue = ref('')
 const inputVisible = ref(false)
 const ruleFormRef = ref()
-const form = reactive<imageItem>({
-  name: props.image?.name || '',
-  source: props.image?.source || '',
-  tags: props.image?.tags || '',
-  category: props.image?.category || 1,
-  id: props.image?.id || '',
+
+const form = ref<imageItem>({
+  name: '',
+  source: '',
+  tags: [],
 })
+const title = computed(() => form.value ? '编辑图片' : '添加图片')
 
 const rules = reactive({
   name: [
@@ -31,20 +29,10 @@ const rules = reactive({
     { required: true, message: '请输入图片标签', trigger: 'blur' },
   ],
 })
-const dialogVisible = ref(true)
-
-function parseArray(value: string): string[] {
-  try {
-    return JSON.parse(value)
-  }
-  catch {
-    return []
-  }
-}
-const dynamicTags = ref<string[]>(parseArray(form.tags))
+const dialogVisible = ref(false)
+const dynamicTags = ref<string[]>(form.value.tags)
 function deleteTag(tag: string) {
   dynamicTags.value = dynamicTags.value.filter(item => item !== tag)
-  form.tags = JSON.stringify(dynamicTags.value)
 }
 const tagType = ref<string[]>(['primary', 'success', 'info', 'warning', 'danger'])
 const InputRef = ref<InputInstance>()
@@ -61,10 +49,29 @@ function showInput() {
     InputRef.value!.input!.focus()
   })
 }
+
+function resetForm() {
+  ruleFormRef.value?.resetFields()
+}
+
+defineExpose({
+  open: (image?: imageItem) => {
+    dialogVisible.value = true
+    if (image) {
+      nextTick(() => {
+        // Object.assign(form.value, image)
+        form.value = {
+          ...image,
+        }
+      })
+    }
+  },
+  close: () => dialogVisible.value = false,
+})
 </script>
 
 <template>
-  <el-dialog v-model="dialogVisible" :title="`${title}图片`" width="50%" center>
+  <el-dialog v-model="dialogVisible" :title="title" width="50%" center @close="resetForm">
     <el-form ref="ruleFormRef" :model="form" label-width="auto" class="w-full" :rules="rules">
       <el-form-item label="名称" prop="name">
         <el-input v-model="form.name" />
@@ -74,7 +81,7 @@ function showInput() {
       </el-form-item>
       <el-form-item label="图片标签" prop="tags">
         <div class="flex gap-2 flex-wrap">
-          <el-tag v-for="(tag, tagIndex) in parseArray(form.tags)" :key="tag" :type="tagType[tagIndex % 4]" closable @close="deleteTag(tag)">
+          <el-tag v-for="(tag, tagIndex) in form.tags" :key="tag" :type="tagType[tagIndex % 4]" closable @close="deleteTag(tag)">
             {{ tag }}
           </el-tag>
           <el-input
@@ -97,7 +104,7 @@ function showInput() {
         <el-button @click="dialogVisible = false">
           取消
         </el-button>
-        <el-button type="primary" @click="emit('updateNewImage', form)">
+        <el-button type="primary" @click.stop="$emit('updateImage', form)">
           确认
         </el-button>
       </div>
