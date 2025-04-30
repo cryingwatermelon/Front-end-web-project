@@ -68,7 +68,8 @@ async function onSubmit(formEl: FormInstance | undefined) {
     const result = await login(ruleForm)
     const userStore = useUserStore()
     userStore.saveToken(result?.data?.token)
-    router.push((route.query.redirect as string) || '/home/bubu')
+    const redirect = typeof route.query.redirect === 'string' && route.query.redirect.trim()
+    router.push(redirect || '/home/bubu')
   }
   catch (error) {
     if (error) {

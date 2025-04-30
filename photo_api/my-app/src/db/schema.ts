@@ -126,4 +126,11 @@ export const keywordParamsSchema = z.object({
 // export const updatePhotoSchema = createInsertSchema(bubu)
 //   .partial()
 //   .omit({ category: true })
-export const patchImageInfoSchema = insertPhotoSchema.partial()
+// export const patchImageInfoSchema = insertPhotoSchema.partial()
+export const patchImageInfoSchema =z.object({
+  name:z.string().min(1),
+  tags:z.array(z.string()).min(1),
+  source:z.string().min(1),
+  category:z.number().min(1),
+  id:z.string().length(10),
+})

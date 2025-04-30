@@ -1,40 +1,56 @@
 <script lang="ts" setup>
 import { Icon } from '@iconify/vue'
 
-import ImageOperation from './imageOperation.vue'
+import Dialog from './Dialog.vue'
 
 import type { imageItem, uploadItem } from '@/types/image'
 import type { ResponseType } from '@/types/response'
 
 import { addImage, deleteImageById, editImage, getBubuImageList, searchImageByTag } from '@/utils/image'
 
-const isAdd = ref(false)
-const isEdit = ref(false)
-const inputValue = ref('')
-const inputVisible = ref(false)
 const showList = ref<imageItem[]>([])
 const searchList = ref<imageItem[]>([])
-const imageOperationRef = ref<InstanceType<typeof ImageOperation>>()
+const DialogRef = ref<InstanceType<typeof Dialog>>()
 async function getBubuList() {
   const list: ResponseType<imageItem[]> = await getBubuImageList()
   showList.value = list.data
-  console.log('showList', showList)
-  for (let i = 0; i < showList.value.length; i++) {
-    const item = showList.value[i]
-  }
 }
 
-async function uploadNewImage(form: uploadItem) {
-  isAdd.value = !isAdd.value
+async function handleAddNewImage(form: uploadItem) {
+  console.log('form', form)
   await addImage(form)
-  form.name = ''
-  form.source = ''
-  form.tags = ''
   getBubuList()
 }
-async function deleteImage(id: string) {
-  await deleteImageById(id)
+async function handleEditImage(form: uploadItem) {
+  // TODO editImage传入id
+  await editImage('123', form)
   getBubuList()
+}
+function deleteImage(id: string) {
+  ElMessageBox.confirm(
+    'Image will permanently delete the file. Continue?',
+    'Warning',
+    {
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+      center: true,
+    },
+  )
+    .then(async () => {
+      await deleteImageById(id)
+      ElMessage({
+        type: 'success',
+        message: 'Delete completed',
+      })
+      getBubuList()
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: 'Delete canceled',
+      })
+    })
 }
 onMounted(() => {
   getBubuList()
@@ -48,36 +64,17 @@ async function searchByTag(tag: string) {
 function clearSearchResult() {
   searchList.value = []
 }
-const editImageItem = ref<imageItem>({
-  name: '',
-  source: '',
-  tags: '',
-  category: 1,
-})
-// function handleEdit(index: number) {
-//   isEdit.value = !isEdit.value
-//   editImageItem.value.category = showList.value[index].category
-//   editImageItem.value.name = showList.value[index].name
-//   editImageItem.value.source = showList.value[index].source
-//   editImageItem.value.tags = showList.value[index].tags
-//   editImageItem.value.id = showList.value[index].id
-// }
-async function updateImageInfo(id: string, form: uploadItem) {
-  isEdit.value = !isEdit.value
-  await editImage(id, form)
-  getBubuList()
-}
 
 const title = ref('')
 const tagType = ref<string[]>(['primary', 'success', 'info', 'warning', 'danger'])
 
 function handleAdd() {
   title.value = '添加'
-  imageOperationRef.value?.open()
+  DialogRef.value?.open()
 }
 function handleEdit(image: imageItem) {
   title.value = '编辑'
-  imageOperationRef.value?.open(image)
+  DialogRef.value?.open(image)
 }
 </script>
 
@@ -132,7 +129,7 @@ function handleEdit(image: imageItem) {
       <span>No Search Result</span>
     </div>
 
-    <ImageOperation ref="imageOperationRef" @update-image="uploadNewImage" />
+    <Dialog ref="DialogRef" @add-image="handleAddNewImage" @update-image="handleEditImage" />
   </div>
 </template>
 

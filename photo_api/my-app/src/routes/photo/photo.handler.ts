@@ -155,8 +155,13 @@ export const updateImageInfo: AppRouteHandler<updateImageInfoRoute> = async (
 ) => {
   const { id } = c.req.valid('param')
   const update = c.req.valid('json')
-  if (!id) {
-    return c.json({ message: 'Id is not found' }, HttpStatusCode.NOT_FOUND)
+  const exist = await db.query.bubu.findFirst({
+    where(fields, operators) {
+      return operators.eq(fields.id, id)
+    },
+  })
+  if (!exist) {
+    return c.json({ message: 'Id is not exist' }, HttpStatusCode.NOT_FOUND)
   }
   const [image] = await db
     .update(bubu)

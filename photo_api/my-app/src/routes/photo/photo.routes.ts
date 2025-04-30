@@ -189,7 +189,7 @@ export const updateImageInfo = createRoute({
     [HttpStatusCode.NO_CONTENT]: { description: 'update successfully' },
     [HttpStatusCode.NOT_FOUND]: jsonContent(
       notFoundSchema,
-      'Image ID not found'
+      'Image ID not exist'
     ),
     [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(patchImageInfoSchema),

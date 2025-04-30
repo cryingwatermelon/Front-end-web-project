@@ -2,7 +2,7 @@
 import type { imageItem } from '@/types/image'
 import type { InputInstance } from 'element-plus'
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'updateImage', image: imageItem): void
   (e: 'addImage', image: imageItem): void
 }>()
@@ -16,7 +16,7 @@ const form = ref<imageItem>({
   source: '',
   tags: [],
 })
-const title = computed(() => form.value ? '编辑图片' : '添加图片')
+const title = computed(() => form.value.name === '' ? '添加图片' : '编辑图片')
 
 const rules = reactive({
   name: [
@@ -30,15 +30,15 @@ const rules = reactive({
   ],
 })
 const dialogVisible = ref(false)
-const dynamicTags = ref<string[]>(form.value.tags)
+
 function deleteTag(tag: string) {
-  dynamicTags.value = dynamicTags.value.filter(item => item !== tag)
+  form.value.tags = form.value.tags.filter(item => item !== tag)
 }
 const tagType = ref<string[]>(['primary', 'success', 'info', 'warning', 'danger'])
 const InputRef = ref<InputInstance>()
 function handleInputConfirm() {
   if (inputValue.value) {
-    dynamicTags.value.push(inputValue.value)
+    form.value.tags.push(inputValue.value)
   }
   inputVisible.value = false
   inputValue.value = ''
@@ -54,6 +54,21 @@ function resetForm() {
   ruleFormRef.value?.resetFields()
 }
 
+function handleCancel() {
+  dialogVisible.value = false
+  resetForm()
+}
+
+function handleConfirm(action: 'add' | 'update') {
+  if (action === 'add') {
+    emit('addImage', form.value)
+  }
+  if (action === 'update') {
+    emit('updateImage', form.value)
+  }
+  dialogVisible.value = false
+  resetForm()
+}
 defineExpose({
   open: (image?: imageItem) => {
     dialogVisible.value = true
@@ -100,13 +115,20 @@ defineExpose({
       </el-form-item>
     </el-form>
     <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="dialogVisible = false">
+      <div class="flex justify-center gap-8">
+        <el-button @click="handleCancel">
           取消
         </el-button>
-        <el-button type="primary" @click.stop="$emit('updateImage', form)">
-          确认
-        </el-button>
+        <div v-if="title === '添加图片'">
+          <el-button type="primary" @click.stop="handleConfirm('add')">
+            确认
+          </el-button>
+        </div>
+        <div v-else>
+          <el-button type="primary" @click.stop="handleConfirm('update')">
+            确认
+          </el-button>
+        </div>
       </div>
     </template>
   </el-dialog>
