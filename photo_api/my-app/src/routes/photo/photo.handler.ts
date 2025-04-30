@@ -147,7 +147,13 @@ export const searchImageByTag: AppRouteHandler<searchByTagRoute> = async (
   if (!images) {
     return c.json({ message: 'Not found' }, HttpStatusCode.NOT_FOUND)
   }
-  return c.json(images, HttpStatusCode.OK)
+  const data = images.map((item) => {
+    return {
+      ...item,
+      tags: JSON.parse(item.tags) as string[],
+    }
+  })
+  return c.json(data, HttpStatusCode.OK)
 }
 
 export const updateImageInfo: AppRouteHandler<updateImageInfoRoute> = async (

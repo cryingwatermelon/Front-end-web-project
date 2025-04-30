@@ -3,7 +3,7 @@ import { Icon } from '@iconify/vue'
 
 import Dialog from './Dialog.vue'
 
-import type { imageItem, uploadItem } from '@/types/image'
+import type { imageItem } from '@/types/image'
 import type { ResponseType } from '@/types/response'
 
 import { addImage, deleteImageById, editImage, getBubuImageList, searchImageByTag } from '@/utils/image'
@@ -16,14 +16,14 @@ async function getBubuList() {
   showList.value = list.data
 }
 
-async function handleAddNewImage(form: uploadItem) {
-  console.log('form', form)
+async function handleAddNewImage(form: imageItem) {
   await addImage(form)
   getBubuList()
 }
-async function handleEditImage(form: uploadItem) {
+async function handleEditImage(form: imageItem) {
   // TODO editImage传入id
-  await editImage('123', form)
+  const id = form.id
+  await editImage(id!, form)
   getBubuList()
 }
 function deleteImage(id: string) {
@@ -126,7 +126,37 @@ function handleEdit(image: imageItem) {
       </div>
     </div>
     <div v-else>
-      <span>No Search Result</span>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-2 ">
+        <div
+          v-for="image in showList"
+          :key="image.id"
+          class="bg-pink-100 border-2 border-pink-200 rounded-2xl shadow-md px-3 transition-transform transform hover:scale-105 hover:shadow-lg"
+        >
+          <div class="w-full h-8 flex justify-end m-1">
+            <div class="border-black border-solid border-2 rounded-full p-1 hover:bg-yellow hover:cursor-pointer">
+              <button class="flex items-center" @click="deleteImage(image.id!)">
+                <Icon :height="20" icon="line-md:remove" />
+              </button>
+            </div>
+          </div>
+          <img
+            :src="image.source"
+            :alt="image.name"
+            class="w-full h-40 object-cover rounded-xl mb-2"
+          >
+          <div class="flex justify-center items-center mb-2">
+            <div class="font-semibold text-pink-500">
+              {{ image.name }}
+            </div>
+            <button><Icon :height="24" icon="material-symbols:edit-square-outline" class="text-yellow-600" @click="handleEdit(image)" /></button>
+          </div>
+          <div v-if="image.tags" class="flex flex-wrap gap-2 mb-2">
+            <el-tag v-for="(tag, tagIndex) in image.tags" :key="tag" :type="tagType[tagIndex % 4]">
+              {{ tag }}
+            </el-tag>
+          </div>
+        </div>
+      </div>
     </div>
 
     <Dialog ref="DialogRef" @add-image="handleAddNewImage" @update-image="handleEditImage" />

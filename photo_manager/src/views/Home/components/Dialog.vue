@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { imageItem } from '@/types/image'
-import type { InputInstance } from 'element-plus'
+import type { imageItem } from '@/types/image';
+import type { InputInstance } from 'element-plus';
 
 const emit = defineEmits<{
   (e: 'updateImage', image: imageItem): void
@@ -15,6 +15,7 @@ const form = ref<imageItem>({
   name: '',
   source: '',
   tags: [],
+  category: 1,
 })
 const title = computed(() => form.value.name === '' ? '添加图片' : '编辑图片')
 
@@ -59,12 +60,18 @@ function handleCancel() {
   resetForm()
 }
 
-function handleConfirm(action: 'add' | 'update') {
-  if (action === 'add') {
-    emit('addImage', form.value)
-  }
-  if (action === 'update') {
+function handleConfirm() {
+  // if (form.value.id === '') {
+  //   emit('addImage', form.value)
+  // }
+  // else {
+  //   emit('updateImage', form.value)
+  // }
+  if (form.value.id?.length) {
     emit('updateImage', form.value)
+  }
+  else {
+    emit('addImage', form.value)
   }
   dialogVisible.value = false
   resetForm()
@@ -119,16 +126,9 @@ defineExpose({
         <el-button @click="handleCancel">
           取消
         </el-button>
-        <div v-if="title === '添加图片'">
-          <el-button type="primary" @click.stop="handleConfirm('add')">
-            确认
-          </el-button>
-        </div>
-        <div v-else>
-          <el-button type="primary" @click.stop="handleConfirm('update')">
-            确认
-          </el-button>
-        </div>
+        <el-button @click.stop="handleConfirm">
+          确认
+        </el-button>
       </div>
     </template>
   </el-dialog>
