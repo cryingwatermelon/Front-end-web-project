@@ -8,7 +8,9 @@ import {
   registerSchema,
   selectPhotoSchema,
   tokenSchema,
-  userInfoSchema,
+  uploadImageFileResultSchema,
+  uploadImageFileSchema,
+  userInfoSchema
 } from '@/db/schema'
 import { notFoundSchema, unAuthorizedSchema } from '@/lib/constants'
 import { createRoute, z } from '@hono/zod-openapi'
@@ -198,3 +200,18 @@ export const updateImageInfo = createRoute({
   },
 })
 export type updateImageInfoRoute = typeof updateImageInfo
+
+//图片上传接口
+export const uploadImageFile=createRoute({
+  path: '/photo/uploadFile',
+  tags,
+  method: 'post',
+  request:{
+    body:jsonContentRequired(uploadImageFileSchema,'The image file'),
+  },
+  responses:{
+    [HttpStatusCode.OK]:jsonContent(uploadImageFileResultSchema,'The image file'),
+    [HttpStatusCode.UNPROCESSABLE_ENTITY]:jsonContent(createErrorSchema(uploadImageFileSchema),'The image file is invalid'),
+  }
+})
+export type uploadImageFileRoute=typeof uploadImageFile

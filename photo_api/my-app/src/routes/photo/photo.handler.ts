@@ -15,6 +15,7 @@ import type {
   registerRoute,
   searchByTagRoute,
   updateImageInfoRoute,
+  uploadImageFileRoute,
   userInfoRoute,
 } from './photo.routes'
 
@@ -184,4 +185,25 @@ export const updateImageInfo: AppRouteHandler<updateImageInfoRoute> = async (
     )
   }
   return c.json(HttpStatusCode.NO_CONTENT)
+}
+
+export const uploadImageFile:AppRouteHandler<uploadImageFileRoute>=async (c)=>{
+  const body = await c.req.parseBody()
+  console.log('body',body)
+  const file=body['file'] as File
+  return c.json({size:file.size},HttpStatusCode.OK)
+//  return c.json({
+//   success: false,
+//   error: {
+//     name: 'UploadError',
+//     issues: [
+//       {
+//         code: 'custom',
+//         path: ['file'],
+//         message: 'upload failed',
+//       },
+//     ],
+//   }
+// }, HttpStatusCode.UNPROCESSABLE_ENTITY)
+
 }

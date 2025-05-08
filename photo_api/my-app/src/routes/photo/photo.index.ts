@@ -10,6 +10,7 @@ import {
   searchImageByTag,
   updateImageInfo,
   updateUserInfo,
+  uploadImageFile,
 } from './photo.handler'
 const photo_router = createRouter()
 photo_router.openapi(routes.login, login)
@@ -21,4 +22,5 @@ photo_router.openapi(routes.uploadImage, addImage)
 photo_router.openapi(routes.deleteImage, deleteImage)
 photo_router.openapi(routes.searchByTag, searchImageByTag)
 photo_router.openapi(routes.updateImageInfo, updateImageInfo)
+photo_router.openapi(routes.uploadImageFile,uploadImageFile)
 export default photo_router

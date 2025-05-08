@@ -38,3 +38,11 @@ export const editImage = function (id: string, data: uploadItem) {
     data,
   })
 }
+
+export const uploadImage = function (data: File) {
+  return service.request({
+    url: '/photo/uploadFile',
+    method: 'post',
+    data,
+  })
+}

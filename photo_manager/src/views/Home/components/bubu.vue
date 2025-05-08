@@ -80,6 +80,8 @@ function handleEdit(image: imageItem) {
 
 <template>
   <div class="flex flex-col items-center">
+    <!-- <img src="http://svuzwd4n0.hb-bkt.clouddn.com/bubu%E5%B0%B1%E4%BD%A0.gif" class="w-[100px] h-[100px] mb-2"> -->
+    <!-- 顶部搜索和添加按钮 -->
     <div class="flex justify-between items-center w-full px-2 py-4">
       <div class="flex flex-between items-center h-full w-1/4 border-pink-300 border-solid border-2 rounded-lg">
         <el-input v-model="search" placeholder="搜索图片" />
@@ -94,7 +96,8 @@ function handleEdit(image: imageItem) {
         <Icon :height="24" icon="material-symbols:add-2-rounded" />
       </el-button>
     </div>
-    <div v-if="!searchList.length" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-2 ">
+    <!-- 图片列表 -->
+    <div v-if="!searchList.length" class="overflow-y-auto max-h-[70vh] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-2 ">
       <div
         v-for="image in showList"
         :key="image.id"
@@ -164,7 +167,16 @@ function handleEdit(image: imageItem) {
 </template>
 
 <style lang="scss" scoped>
-.custom_text{
-  overflow: hidden;
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #FBCFE8; // Tailwind 的 pink-300
+  border-radius: 9999px;
 }
 </style>
