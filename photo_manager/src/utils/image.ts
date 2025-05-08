@@ -41,7 +41,7 @@ export const editImage = function (id: string, data: uploadItem) {
 
 export const uploadImage = function (data: File) {
   return service.request({
-    url: '/photo/uploadFile',
+    url: '/photo',
     method: 'post',
     data,
   })

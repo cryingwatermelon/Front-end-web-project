@@ -1,8 +1,12 @@
+import { db } from '@/db'
+import { loginSchema, tokenSchema } from '@/db/schema'
+import { notFoundSchema, unAuthorizedSchema } from '@/lib/constants'
 import { createRouter } from '@/lib/create-app'
 import { createRoute } from '@hono/zod-openapi'
 import { jwt } from 'hono/jwt'
+import Jwt from 'jsonwebtoken'
 import * as HttpStatusCode from 'stoker/http-status-codes'
-import { jsonContent } from 'stoker/openapi/helpers'
+import { jsonContent, jsonContentRequired } from 'stoker/openapi/helpers'
 import createMessageObjectSchema from 'stoker/openapi/schemas/create-message-object'
 import { z } from 'zod'
 import env from '../../env'
@@ -48,7 +52,7 @@ app.openapi(
 const fakeDB = [
   {
     username: 'admin',
-    password: '123456',
+    password: '67890',
   },
 ]
 
@@ -105,5 +109,49 @@ app.openapi(
       })
     }
   }
+)
+app.openapi(
+  createRoute({
+  path: '/login',
+  method: 'post',
+  request: {
+    body: jsonContentRequired(loginSchema, 'The login account information'),
+  },
+  responses: {
+    [HttpStatusCode.OK]: jsonContent(tokenSchema, 'Login successful'),
+    [HttpStatusCode.BAD_REQUEST]: jsonContent(
+      unAuthorizedSchema,
+      'username or password is incorrect'
+    ),
+    [HttpStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, 'user not found'),
+  },
+}),
+async (c) => {
+  const { username, password } = await c.req.json()
+  const user = await db.query.users.findFirst({
+    where(fields, operators) {
+      return operators.eq(fields.username, username)
+    },
+  })
+  if (!user) {
+    return c.json(
+      {
+        message: 'User not found',
+      },
+      HttpStatusCode.NOT_FOUND
+    )
+  }
+
+  if (password !== user.password) {
+    return c.json(
+      { message: 'Password is incorrect' },
+      HttpStatusCode.BAD_REQUEST
+    )
+  }
+  const token = Jwt.sign({ username: user.username }, env.SECRET, {
+      expiresIn: '2h',
+    })
+    return c.json({ token: token }, HttpStatusCode.OK)
+}
 )
 export default app

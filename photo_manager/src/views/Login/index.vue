@@ -18,7 +18,7 @@ const rememberMe = ref(false)
 const ruleFormRef = ref<FormInstance>()
 const ruleForm = reactive<UserData>({
   username: 'admin',
-  password: '123456',
+  password: '67890',
 })
 
 const rules = reactive<FormRules<UserData>>({

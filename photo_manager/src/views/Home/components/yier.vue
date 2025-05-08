@@ -8,7 +8,7 @@ const error = ref<string | null>(null)
 const isLoading = ref(false) // 添加加载状态
 
 // 允许的文件类型
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif']
 
 async function handleFileChange(event: Event) {
   const target = event.target as HTMLInputElement
@@ -43,15 +43,16 @@ async function handleFileChange(event: Event) {
     isLoading.value = true
 
     const res = await service.request({
-      url: '/photo/uploadFile',
+      url: '/photo',
       method: 'POST',
       data: formData,
       headers: {
         // 显式清除 Content-Type 让浏览器自动设置
-        'Content-Type': undefined,
+        'Content-Type': 'multipart/form-data',
       },
     })
     console.log('res', res)
+    console.log(ALLOWED_TYPES.toString())
     if (res.status === 200) {
       uploadResult.value = { size: res.data.size }
     }
@@ -73,7 +74,7 @@ async function handleFileChange(event: Event) {
     <label class="file-input-wrapper">
       <input
         type="file"
-        accept="image/jpeg, image/png, image/webp"
+        :accept="ALLOWED_TYPES.toString()"
         :disabled="isLoading"
         @change="handleFileChange"
       >
