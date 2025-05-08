@@ -117,13 +117,12 @@ export const insertPhotoSchema = z.object({
 
 export const uploadImageFileSchema=z.object({
   file:z.instanceof(File).refine((file) => {
-    console.log(file.size)
     return file.size <= 2 * 1024 * 1024
   })
 })
 
 export const uploadImageFileResultSchema=z.object({
- size:z.any()
+ size:z.number()
 })
 export const ImageIdParamsSchema = z.object({
   id: z.string().length(10),

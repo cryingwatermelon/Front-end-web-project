@@ -14,19 +14,6 @@ export function createRouter() {
 }
 
 export default function createApp() {
-  // const app = new OpenAPIHono<AppBindings>({ strict: false }).use(
-  //   pinoLogger({
-  //     pino: {
-  //       level: env.LOG_LEVEL || 'info',
-  //       transport: {
-  //         target: env.NODE_ENV === 'production' ? '' : 'pino-pretty',
-  //       },
-  //     },
-  //     http: {
-  //       reqId: () => crypto.randomUUID(),
-  //     },
-  //   })
-  // )
   const app = createRouter()
   app.use(
     pinoLogger({

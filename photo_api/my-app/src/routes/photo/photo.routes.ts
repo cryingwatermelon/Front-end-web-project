@@ -35,26 +35,26 @@ export const login = createRoute({
   },
 })
 
-// export const list = createRoute({
-//   path: 'photo/list',
-//   method: 'get',
-//   tags,
-//   request: {
-//     headers: tokenSchema,
-//     body: jsonContentRequired(tokenSchema, 'token in localStorage'),
-//   },
-//   responses: {
-//     [HttpStatusCode.OK]: jsonContent(tokenSchema, 'Logout Successfully'),
-//     [HttpStatusCode.BAD_REQUEST]: jsonContent(
-//       notFoundSchema,
-//       'User is not exist'
-//     ),
-//   },
-// })
+export const list = createRoute({
+  path: '/list',
+  method: 'get',
+  tags,
+  request: {
+    headers: tokenSchema,
+    body: jsonContentRequired(tokenSchema, 'token in localStorage'),
+  },
+  responses: {
+    [HttpStatusCode.OK]: jsonContent(tokenSchema, 'Logout Successfully'),
+    [HttpStatusCode.BAD_REQUEST]: jsonContent(
+      notFoundSchema,
+      'User is not exist'
+    ),
+  },
+})
 export type LoginRoute = typeof login
 
 export const userInfo = createRoute({
-  path: 'photo/userInfo',
+  path: '/userInfo',
   tags,
   method: 'get',
   request: {},
@@ -68,7 +68,7 @@ export const userInfo = createRoute({
 })
 
 export const updateUserInfo = createRoute({
-  path: '/photo/userInfo',
+  path: '/userInfo',
   method: 'patch',
   tags,
   request: {
@@ -111,7 +111,7 @@ export type patchUserInfoRoute = typeof updateUserInfo
 export type registerRoute = typeof register
 
 export const bubuList = createRoute({
-  path: '/photo/bubuList',
+  path: '/bubuList',
   tags,
   method: 'get',
   request: {},
@@ -126,7 +126,7 @@ export const bubuList = createRoute({
 export type bubuListRoute = typeof bubuList
 
 export const uploadImage = createRoute({
-  path: '/photo/upload',
+  path: '/upload',
   tags,
   method: 'post',
   request: {
@@ -143,7 +143,7 @@ export const uploadImage = createRoute({
 
 export type addImageRoute = typeof uploadImage
 export const deleteImage = createRoute({
-  path: '/photo/{id}',
+  path: '/{id}',
   tags,
   method: 'delete',
   request: {
@@ -160,7 +160,7 @@ export const deleteImage = createRoute({
 export type deleteImageRoute = typeof deleteImage
 
 export const searchByTag = createRoute({
-  path: '/photo/{keyword}',
+  path: '/{keyword}',
   tags,
   method: 'post',
   request: {
@@ -177,7 +177,7 @@ export const searchByTag = createRoute({
 export type searchByTagRoute = typeof searchByTag
 
 export const updateImageInfo = createRoute({
-  path: '/photo/update/{id}',
+  path: '/update/{id}',
   tags,
   method: 'patch',
   request: {
@@ -203,11 +203,17 @@ export type updateImageInfoRoute = typeof updateImageInfo
 
 //图片上传接口
 export const uploadImageFile=createRoute({
-  path: '/photo/uploadFile',
-  tags,
+  path: '/',
   method: 'post',
+  tags,
   request:{
-    body:jsonContentRequired(uploadImageFileSchema,'The image file'),
+    body:{
+      content:{
+        'multipart/form-data':{
+          schema:uploadImageFileSchema
+        }
+      }
+    }
   },
   responses:{
     [HttpStatusCode.OK]:jsonContent(uploadImageFileResultSchema,'The image file'),
