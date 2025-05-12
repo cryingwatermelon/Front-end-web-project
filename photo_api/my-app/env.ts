@@ -26,6 +26,10 @@ const EnvSchema = z
     TURSO_DATABASE_URL: z.string().url(),
     TURSO_AUTH_TOKEN: z.string().optional(),
     SECRET: z.string(),
+    QINIU_ACCESS_KEY: z.string(),
+    QINIU_SECRET_KEY: z.string(),
+    DOMAIN: z.string(),
+
   })
   .superRefine((input, ctx) => {
     if (input.NODE_ENV === 'production' && !input.TURSO_AUTH_TOKEN) {

@@ -51,8 +51,6 @@ async function handleFileChange(event: Event) {
         'Content-Type': 'multipart/form-data',
       },
     })
-    console.log('res', res)
-    console.log(ALLOWED_TYPES.toString())
     if (res.status === 200) {
       uploadResult.value = { size: res.data.size }
     }

@@ -2,8 +2,12 @@ import { db } from '@/db'
 import { bubu, users } from '@/db/schema'
 import type { AppRouteHandler } from '@/lib/types'
 import { eq, like } from 'drizzle-orm'
+import fs from 'fs'
 import Jwt from 'jsonwebtoken'
 import { nanoid } from 'nanoid'
+import path from 'path'
+import process from 'process'
+import qiniu from 'qiniu'
 import * as HttpStatusCode from 'stoker/http-status-codes'
 import env from '../../../env'
 import type {
@@ -18,6 +22,7 @@ import type {
   uploadImageFileRoute,
   userInfoRoute,
 } from './photo.routes'
+import { getToken, reName } from './qiniu'
 
 export const login: AppRouteHandler<LoginRoute> = async (c) => {
   const { username, password } = await c.req.json()
@@ -187,8 +192,97 @@ export const updateImageInfo: AppRouteHandler<updateImageInfoRoute> = async (
   return c.json(HttpStatusCode.NO_CONTENT)
 }
 
+
+
 export const uploadImageFile:AppRouteHandler<uploadImageFileRoute>=async (c)=>{
   const body = await c.req.parseBody()
   const file=body['file'] as File
-  return c.json({size:file.size},HttpStatusCode.OK)
+
+  const arrayBuffer=await file.arrayBuffer()
+  const buffer=Buffer.from(arrayBuffer)
+  const filePath=path.join(process.cwd(), 'upload', reName(file.name))
+  await fs.writeFileSync(filePath, buffer)
+  //获取七牛云token
+  const uploadToken =getToken()
+  console.log('uploadToken',uploadToken)
+
+  //官方文档写法
+  const config=new qiniu.conf.Config()
+  config.useHttpsDomain = true;
+  const accessKey = env.QINIU_ACCESS_KEY
+  const secretKey = env.QINIU_SECRET_KEY
+  const mac=new qiniu.auth.digest.Mac(accessKey, secretKey) 
+  config.regionsProvider=qiniu.httpc.Region.fromRegionId('z1')
+  const bucketManager = new qiniu.rs.BucketManager(mac, config);
+  const bucket='bubu0507'
+  const key='bubu.gif'
+bucketManager
+  .stat(bucket, key)
+  .then(({ data, resp }) => {
+    if (resp.statusCode === 200) {
+      console.log(data.hash);
+      console.log(data.fsize);
+      console.log(data.mimeType);
+      console.log(data.putTime);
+      console.log(data.type);
+    } else {
+      console.log(resp.statusCode);
+      console.log(data);
+    }
+  })
+  .catch((err) => {
+    console.log("failed", err);
+  });
 }
+  // const formUploader = new qiniu.form_up.FormUploader(config);
+//   const putExtra = new qiniu.form_up.PutExtra()
+//   formUploader.putFile(uploadToken,'avatar.png', filePath, putExtra)
+//   .then(({ data, resp }) => {
+//     if (resp.statusCode === 200) {
+//       console.log(data);
+//       fs.rmSync(filePath)
+//     } else {
+//       console.log(resp.statusCode);
+//       console.log(data);
+//     }
+//   })
+//   .catch((err) => {
+//     console.log("failed", err);
+//   });
+//     console.log('file',file)
+//   return c.json({size:file.size},HttpStatusCode.OK)
+// }
+
+  //上传图片到七牛云
+  // const domain='https://upload-z1.qiniup.com'
+  // const name=reName(file.name)
+  // const formData=new FormData()
+  // formData.append('file',file)
+  // formData.append('token',uploadToken)
+  // formData.append('key',name)
+  // const result= fetch(domain,{
+  //   method:'POST',
+  //   body:formData,
+  //   headers:{
+  //     'Content-Type':'multipart/form-data'
+  //   }
+  // }).then (response=>{
+  //   if(!response.ok){
+  //     throw new Error(`HTTP error! status: ${response.status}`);
+  //   }
+  // })
+  //   console.log('result',result)
+
+  // formUploader
+  // .put(uploadToken, key, file.toString(), putExtra)
+  // .then(({ data, resp }) => {
+  //   if (resp.statusCode === 200) {
+  //     console.log(data);
+  //   } else {
+  //   console.log('resp.statusCode',resp.statusCode)
+  //   console.log('data',data);
+  //   }
+  // })
+  // .catch((err) => {
+  //   console.log("failed", err);
+  // });
