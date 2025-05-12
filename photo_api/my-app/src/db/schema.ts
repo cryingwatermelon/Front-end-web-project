@@ -30,7 +30,7 @@ export const selectTasksSchema = createSelectSchema(tasks)
 // export type selectTasksSchemaType = z.infer<typeof selectTasksSchema>
 
 export const insertTasksSchema = createInsertSchema(tasks, {
-  name: (schema) => schema.min(1).max(500),
+  name: schema => schema.min(1).max(500),
 })
   .required({
     done: true,
@@ -45,7 +45,7 @@ export const insertTasksSchema = createInsertSchema(tasks, {
 export const patchTasksSchema = insertTasksSchema.partial()
 // export type patchTasksSchemaType = z.infer<typeof patchTasksSchema>
 
-//login
+// login
 export const users = sqliteTable('users', {
   username: text('username').notNull().unique(),
   password: text('password').notNull(),
@@ -83,7 +83,7 @@ export const insertUserInfoSchema = createInsertSchema(users).omit({
 })
 export const patchUserInfoSchema = insertUserInfoSchema.partial()
 
-//bubu
+// bubu
 export const bubu = sqliteTable('bubu', {
   id: text('id')
     .notNull()
@@ -103,7 +103,7 @@ export const yier = sqliteTable('yier', {
 })
 
 export const selectPhotoSchema = createSelectSchema(bubu)
-  .transform((data) => ({
+  .transform(data => ({
     ...data,
     tags: JSON.parse(data.tags),
   }))
@@ -115,14 +115,14 @@ export const insertPhotoSchema = z.object({
   tags: z.array(z.string()).min(1),
 })
 
-export const uploadImageFileSchema=z.object({
-  file:z.instanceof(File).refine((file) => {
+export const uploadImageFileSchema = z.object({
+  file: z.instanceof(File).refine((file) => {
     return file.size <= 2 * 1024 * 1024
-  })
+  }),
 })
 
-export const uploadImageFileResultSchema=z.object({
- size:z.number()
+export const uploadImageFileResultSchema = z.object({
+  url: z.string(),
 })
 export const ImageIdParamsSchema = z.object({
   id: z.string().length(10),
@@ -136,10 +136,10 @@ export const keywordParamsSchema = z.object({
 //   .partial()
 //   .omit({ category: true })
 // export const patchImageInfoSchema = insertPhotoSchema.partial()
-export const patchImageInfoSchema =z.object({
-  name:z.string().min(1),
-  tags:z.array(z.string()).min(1),
-  source:z.string().min(1),
-  category:z.number().min(1),
-  id:z.string().length(10),
+export const patchImageInfoSchema = z.object({
+  name: z.string().min(1),
+  tags: z.array(z.string()).min(1),
+  source: z.string().min(1),
+  category: z.number().min(1),
+  id: z.string().length(10),
 })

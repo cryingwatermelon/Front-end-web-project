@@ -10,13 +10,14 @@ import {
   tokenSchema,
   uploadImageFileResultSchema,
   uploadImageFileSchema,
-  userInfoSchema
+  userInfoSchema,
 } from '@/db/schema'
 import { notFoundSchema, unAuthorizedSchema } from '@/lib/constants'
 import { createRoute, z } from '@hono/zod-openapi'
 import * as HttpStatusCode from 'stoker/http-status-codes'
 import { jsonContent, jsonContentRequired } from 'stoker/openapi/helpers'
 import { createErrorSchema } from 'stoker/openapi/schemas'
+
 const tags = ['photo']
 export const login = createRoute({
   path: '/login',
@@ -29,7 +30,7 @@ export const login = createRoute({
     [HttpStatusCode.OK]: jsonContent(tokenSchema, 'Login successful'),
     [HttpStatusCode.BAD_REQUEST]: jsonContent(
       unAuthorizedSchema,
-      'username or password is incorrect'
+      'username or password is incorrect',
     ),
     [HttpStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, 'user not found'),
   },
@@ -47,7 +48,7 @@ export const list = createRoute({
     [HttpStatusCode.OK]: jsonContent(tokenSchema, 'Logout Successfully'),
     [HttpStatusCode.BAD_REQUEST]: jsonContent(
       notFoundSchema,
-      'User is not exist'
+      'User is not exist',
     ),
   },
 })
@@ -62,7 +63,7 @@ export const userInfo = createRoute({
     [HttpStatusCode.OK]: jsonContent(userInfoSchema, 'User information'),
     [HttpStatusCode.NOT_FOUND]: jsonContent(
       notFoundSchema,
-      'Can not find any info through given username '
+      'Can not find any info through given username ',
     ),
   },
 })
@@ -74,7 +75,7 @@ export const updateUserInfo = createRoute({
   request: {
     body: jsonContentRequired(
       patchUserInfoSchema,
-      'The updated user information'
+      'The updated user information',
     ),
   },
   responses: {
@@ -82,7 +83,7 @@ export const updateUserInfo = createRoute({
     [HttpStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, 'User not found'),
     [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(patchUserInfoSchema),
-      'The validation errors'
+      'The validation errors',
     ),
   },
 })
@@ -93,7 +94,7 @@ export const register = createRoute({
   request: {
     body: jsonContentRequired(
       registerSchema,
-      'The register account information'
+      'The register account information',
     ),
   },
   responses: {
@@ -102,7 +103,7 @@ export const register = createRoute({
     },
     [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(registerSchema),
-      'The username is already exist'
+      'The username is already exist',
     ),
   },
 })
@@ -118,7 +119,7 @@ export const bubuList = createRoute({
   responses: {
     [HttpStatusCode.OK]: jsonContent(
       z.array(selectPhotoSchema),
-      'The list of bubu images'
+      'The list of bubu images',
     ),
     [HttpStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, 'No images found'),
   },
@@ -136,7 +137,7 @@ export const uploadImage = createRoute({
     [HttpStatusCode.NO_CONTENT]: { description: 'Upload successfully' },
     [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(insertPhotoSchema),
-      'The image is already exist'
+      'The image is already exist',
     ),
   },
 })
@@ -153,7 +154,7 @@ export const deleteImage = createRoute({
     [HttpStatusCode.NO_CONTENT]: { description: 'Delete successfully' },
     [HttpStatusCode.NOT_FOUND]: jsonContent(
       notFoundSchema,
-      'The image Id is not exist'
+      'The image Id is not exist',
     ),
   },
 })
@@ -169,7 +170,7 @@ export const searchByTag = createRoute({
   responses: {
     [HttpStatusCode.OK]: jsonContent(
       z.array(selectPhotoSchema),
-      'The list of images with the given tag'
+      'The list of images with the given tag',
     ),
     [HttpStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, 'No images found'),
   },
@@ -184,40 +185,40 @@ export const updateImageInfo = createRoute({
     params: ImageIdParamsSchema,
     body: jsonContentRequired(
       patchImageInfoSchema,
-      'The updated image information'
+      'The updated image information',
     ),
   },
   responses: {
     [HttpStatusCode.NO_CONTENT]: { description: 'update successfully' },
     [HttpStatusCode.NOT_FOUND]: jsonContent(
       notFoundSchema,
-      'Image ID not exist'
+      'Image ID not exist',
     ),
     [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(patchImageInfoSchema),
-      'The Image update information is invalid'
+      'The Image update information is invalid',
     ),
   },
 })
 export type updateImageInfoRoute = typeof updateImageInfo
 
-//图片上传接口
-export const uploadImageFile=createRoute({
+// 图片上传接口
+export const uploadImageFile = createRoute({
   path: '/',
   method: 'post',
   tags,
-  request:{
-    body:{
-      content:{
-        'multipart/form-data':{
-          schema:uploadImageFileSchema
-        }
-      }
-    }
+  request: {
+    body: {
+      content: {
+        'multipart/form-data': {
+          schema: uploadImageFileSchema,
+        },
+      },
+    },
   },
-  responses:{
-    [HttpStatusCode.OK]:jsonContent(uploadImageFileResultSchema,'The image file'),
-    [HttpStatusCode.UNPROCESSABLE_ENTITY]:jsonContent(createErrorSchema(uploadImageFileSchema),'The image file is invalid'),
-  }
+  responses: {
+    [HttpStatusCode.OK]: jsonContent(uploadImageFileResultSchema, 'The image file upload successfully'),
+    [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(createErrorSchema(uploadImageFileSchema), 'The image file is invalid'),
+  },
 })
-export type uploadImageFileRoute=typeof uploadImageFile
+export type uploadImageFileRoute = typeof uploadImageFile

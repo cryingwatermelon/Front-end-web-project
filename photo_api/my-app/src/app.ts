@@ -8,13 +8,13 @@ import env from '../env'
 
 const myapp = createApp()
 
-//第二种写法
+// 第二种写法
 configureOpenAPI(myapp)
-myapp.route('/',index)
-myapp.route('/tasks',tasks)
+myapp.route('/', index)
+myapp.route('/tasks', tasks)
 
-myapp.use('/photo/*', jwt({ secret: env.SECRET }))
-myapp.route('/photo',photo)
+// myapp.use('/photo/*', jwt({ secret: env.SECRET }))
+myapp.route('/photo', photo)
 
 export type AppType = typeof myapp
 export default myapp
