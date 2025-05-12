@@ -1,10 +1,11 @@
+import type { AppBindings, AppOpenAPI } from './types'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { pinoLogger } from 'hono-pino'
 import { notFound, onError, serveEmojiFavicon } from 'stoker/middlewares'
 import defaultHook from 'stoker/openapi/default-hook'
+
 import env from '../../env'
 
-import type { AppBindings, AppOpenAPI } from './types'
 export function createRouter() {
   const app = new OpenAPIHono<AppBindings>({
     strict: false,
@@ -26,7 +27,7 @@ export default function createApp() {
       http: {
         reqId: () => crypto.randomUUID(),
       },
-    })
+    }),
   )
   app.use(serveEmojiFavicon('🍉'))
   app.notFound(notFound)

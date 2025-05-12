@@ -1,14 +1,17 @@
+import type { ZodError } from 'zod'
+import path from 'node:path'
+import process from 'node:process'
 import { config } from 'dotenv'
 import { expand } from 'dotenv-expand'
-import path from 'path'
-import { z, ZodError } from 'zod'
+import { z } from 'zod'
+
 expand(
   config({
     path: path.resolve(
       process.cwd(),
-      process.env.NODE_ENV === 'test' ? '.env.test' : '.env'
+      process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
     ),
-  })
+  }),
 )
 const EnvSchema = z
   .object({
@@ -56,14 +59,16 @@ const EnvSchema = z
 //     }
 //   )
 export type env = z.infer<typeof EnvSchema>
+// eslint-disable-next-line import/no-mutable-exports, ts/no-redeclare
 let env: env
 try {
   env = EnvSchema.parse(process.env)
-  console.log(env)
-} catch (e) {
+  console.info(env)
+}
+catch (e) {
   const error = e as ZodError
-  console.log('Invalid env')
-  console.log(error.flatten().fieldErrors)
+  console.info('Invalid env')
+  console.error(error.flatten().fieldErrors)
   process.exit(1)
 }
 export default env

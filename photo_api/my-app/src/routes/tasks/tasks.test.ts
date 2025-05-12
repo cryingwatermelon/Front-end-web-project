@@ -1,6 +1,6 @@
 import type { tasksType } from '@/db/schema'
+import { execSync } from 'node:child_process'
 import createApp, { createTestApp } from '@/lib/create-app'
-import { execSync } from 'child_process'
 import { testClient } from 'hono/testing'
 import { beforeAll, describe, expect, expectTypeOf, it } from 'vitest'
 import env from '../../../env'
@@ -20,27 +20,26 @@ describe('tasks list', async () => {
     const testRouter = createTestApp(router)
     const response = await testRouter.request('/tasks')
     const result: tasksType[] = await response.json()
-    console.log(result)
+    console.info(result)
     expectTypeOf(result).toBeArray()
   })
   it('responds with an array(testClient)', async () => {
     const client: any = await testClient(createApp().route('/', router))
-    console.log('client', client)
+    console.info('client', client)
     const response = await client.tasks.$get()
-    console.log('response', response)
+    console.info('response', response)
     const json = await response.json()
-    console.log('json', json)
+    console.info('json', json)
   })
   it('validates the id param(testClient)', async () => {
     const client: any = await testClient(
-      createApp().route('/tasks/{id}', router)
+      createApp().route('/tasks/{id}', router),
     )
     const response = await client.tasks[':id'].$get({
       params: {
         id: 'whatever',
       },
     })
-    console.log('response', response)
     expect(response.status).toBe(422)
   })
   it('validates the body when creating', async () => {
@@ -52,7 +51,7 @@ describe('tasks list', async () => {
         status: 'completed',
       },
     })
-    console.log('response', response)
+    console.info('response', response)
     expect(response.status).toBe(422)
   })
 })

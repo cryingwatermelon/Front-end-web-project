@@ -12,6 +12,7 @@ import {
   jsonContentRequired,
 } from 'stoker/openapi/helpers'
 import { createErrorSchema, IdParamsSchema } from 'stoker/openapi/schemas'
+
 const tags = ['tasks']
 // const targetUrl = 'http://localhost:9999/tasks'
 export const list = createRoute({
@@ -21,7 +22,7 @@ export const list = createRoute({
   responses: {
     [HttpStatusCode.OK]: jsonContent(
       z.array(selectTasksSchema),
-      'The list of todo tasks'
+      'The list of todo tasks',
     ),
     [HttpStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, 'No tasks found'),
   },
@@ -39,7 +40,7 @@ export const create = createRoute({
     [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(
       // z.object({}),
       createErrorSchema(insertTasksSchema),
-      'The validation error(s)'
+      'The validation error(s)',
     ),
   },
 })
@@ -55,7 +56,7 @@ export const getOne = createRoute({
     [HttpStatusCode.OK]: jsonContent(selectTasksSchema, 'The requested task'),
     [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(IdParamsSchema),
-      'Invalid id'
+      'Invalid id',
     ),
     [HttpStatusCode.NOT_FOUND]: jsonContent(
       // z
@@ -64,12 +65,12 @@ export const getOne = createRoute({
       //   })
       //   .openapi({ example: { message: 'Task not found' } }),
       notFoundSchema,
-      'Task not found'
+      'Task not found',
     ),
   },
 })
 
-//更新部分资源
+// 更新部分资源
 export const patch = createRoute({
   path: '/tasks/{id}',
   method: 'patch',
@@ -83,9 +84,9 @@ export const patch = createRoute({
     [HttpStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, 'Task not found'),
     [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContentOneOf(
       [createErrorSchema(patchTasksSchema), createErrorSchema(IdParamsSchema)],
-      'The validation error(s)'
+      'The validation error(s)',
     ),
-    //这样写是anyof
+    // 这样写是anyof
     // [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(
     //   createErrorSchema(patchTasksSchema).or(createErrorSchema(IdParamsSchema)),
     //   'The validation error(s)'
@@ -107,7 +108,7 @@ export const remove = createRoute({
     [HttpStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, 'Task not found'),
     [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(
       createErrorSchema(IdParamsSchema),
-      'Invalid Id error'
+      'Invalid Id error',
     ),
   },
 })

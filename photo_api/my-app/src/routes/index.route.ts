@@ -10,8 +10,8 @@ import { jsonContent, jsonContentRequired } from 'stoker/openapi/helpers'
 import createMessageObjectSchema from 'stoker/openapi/schemas/create-message-object'
 import { z } from 'zod'
 import env from '../../env'
-const app = createRouter()
 
+const app = createRouter()
 
 app.openapi(
   createRoute({
@@ -36,7 +36,7 @@ app.openapi(
         //   message: z.string(),
         // }),
         createMessageObjectSchema('hello world'),
-        'Tasks API index' //description
+        'Tasks API index', // description
       ),
     },
   }),
@@ -45,9 +45,9 @@ app.openapi(
       {
         message: 'Test Get API',
       },
-      HttpStatusCode.OK
+      HttpStatusCode.OK,
     )
-  }
+  },
 )
 const fakeDB = [
   {
@@ -65,7 +65,7 @@ app.openapi(
         z.object({
           message: z.string(),
         }),
-        'You are authorized'
+        'You are authorized',
       ),
     },
     request: {
@@ -74,84 +74,84 @@ app.openapi(
           username: z.string().min(1, 'Username is required'),
           password: z.string().min(1, 'Password is required'),
         }),
-        'The login account information'
+        'The login account information',
       ),
     },
   }),
   async (c) => {
     try {
       const { username, password } = await c.req.json()
-      //验证用户输入
+      // 验证用户输入
       if (!username || !password) {
         return c.json({
           message: 'username or password is required',
         })
       }
-      //去数据库中查找
+      // 去数据库中查找
       const user = fakeDB.find(
-        (user) => user.username === username && user.password === password
+        user => user.username === username && user.password === password,
       )
       if (!user) {
         return c.json({
           message: 'username or password is incorrect',
         })
       }
-      //生成token
+      // 生成token
       const token = jwt({ secret: env.SECRET })
       return c.json({
         message: 'return token successfully',
         token,
       })
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    }
+    catch {
       return c.json({
         message: 'Invalid request',
       })
     }
-  }
+  },
 )
 app.openapi(
   createRoute({
-  path: '/login',
-  method: 'post',
-  request: {
-    body: jsonContentRequired(loginSchema, 'The login account information'),
-  },
-  responses: {
-    [HttpStatusCode.OK]: jsonContent(tokenSchema, 'Login successful'),
-    [HttpStatusCode.BAD_REQUEST]: jsonContent(
-      unAuthorizedSchema,
-      'username or password is incorrect'
-    ),
-    [HttpStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, 'user not found'),
-  },
-}),
-async (c) => {
-  const { username, password } = await c.req.json()
-  const user = await db.query.users.findFirst({
-    where(fields, operators) {
-      return operators.eq(fields.username, username)
+    path: '/login',
+    method: 'post',
+    request: {
+      body: jsonContentRequired(loginSchema, 'The login account information'),
     },
-  })
-  if (!user) {
-    return c.json(
-      {
-        message: 'User not found',
+    responses: {
+      [HttpStatusCode.OK]: jsonContent(tokenSchema, 'Login successful'),
+      [HttpStatusCode.BAD_REQUEST]: jsonContent(
+        unAuthorizedSchema,
+        'username or password is incorrect',
+      ),
+      [HttpStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, 'user not found'),
+    },
+  }),
+  async (c) => {
+    const { username, password } = await c.req.json()
+    const user = await db.query.users.findFirst({
+      where(fields, operators) {
+        return operators.eq(fields.username, username)
       },
-      HttpStatusCode.NOT_FOUND
-    )
-  }
+    })
+    if (!user) {
+      return c.json(
+        {
+          message: 'User not found',
+        },
+        HttpStatusCode.NOT_FOUND,
+      )
+    }
 
-  if (password !== user.password) {
-    return c.json(
-      { message: 'Password is incorrect' },
-      HttpStatusCode.BAD_REQUEST
-    )
-  }
-  const token = Jwt.sign({ username: user.username }, env.SECRET, {
+    if (password !== user.password) {
+      return c.json(
+        { message: 'Password is incorrect' },
+        HttpStatusCode.BAD_REQUEST,
+      )
+    }
+    const token = Jwt.sign({ username: user.username }, env.SECRET, {
       expiresIn: '2h',
     })
-    return c.json({ token: token }, HttpStatusCode.OK)
-}
+    return c.json({ token }, HttpStatusCode.OK)
+  },
 )
 export default app

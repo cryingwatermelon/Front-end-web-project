@@ -1,9 +1,4 @@
-import { db } from '@/db'
-import { tasks } from '@/db/schema'
 import type { AppRouteHandler } from '@/lib/types'
-import { eq } from 'drizzle-orm'
-import * as HttpStatusCode from 'stoker/http-status-codes'
-import * as HttpStatusPhrases from 'stoker/http-status-phrases'
 import type {
   CreateRoute,
   GetOneRoute,
@@ -11,6 +6,11 @@ import type {
   PatchRoute,
   RemoveRoute,
 } from './tasks.routes'
+import { db } from '@/db'
+import { tasks } from '@/db/schema'
+import { eq } from 'drizzle-orm'
+import * as HttpStatusCode from 'stoker/http-status-codes'
+import * as HttpStatusPhrases from 'stoker/http-status-phrases'
 
 export const list: AppRouteHandler<ListRoute> = async (c) => {
   const tasks = await db.query.tasks.findMany()
@@ -33,7 +33,7 @@ export const getOne: AppRouteHandler<GetOneRoute> = async (c) => {
   if (!task) {
     return c.json(
       { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCode.NOT_FOUND
+      HttpStatusCode.NOT_FOUND,
     )
   }
   return c.json(task, HttpStatusCode.OK)
@@ -50,7 +50,7 @@ export const patch: AppRouteHandler<PatchRoute> = async (c) => {
   if (!task) {
     return c.json(
       { message: HttpStatusPhrases.NOT_FOUND },
-      HttpStatusCode.NOT_FOUND
+      HttpStatusCode.NOT_FOUND,
     )
   }
   return c.json(task, HttpStatusCode.OK)
@@ -64,7 +64,7 @@ export const remove: AppRouteHandler<RemoveRoute> = async (c) => {
       {
         message: HttpStatusPhrases.NOT_FOUND,
       },
-      HttpStatusCode.NOT_FOUND
+      HttpStatusCode.NOT_FOUND,
     )
   }
   return c.body(null, HttpStatusCode.NO_CONTENT)

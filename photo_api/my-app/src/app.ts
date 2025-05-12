@@ -13,7 +13,7 @@ configureOpenAPI(myapp)
 myapp.route('/', index)
 myapp.route('/tasks', tasks)
 
-// myapp.use('/photo/*', jwt({ secret: env.SECRET }))
+myapp.use('/photo/*', jwt({ secret: env.SECRET }))
 myapp.route('/photo', photo)
 
 export type AppType = typeof myapp
