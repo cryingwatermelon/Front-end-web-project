@@ -201,12 +201,27 @@ export const uploadImageFile: AppRouteHandler<uploadImageFileRoute> = async (c) 
   await fs.writeFileSync(filePath, buffer)
   const fileName = reName(file.name)
 
-  const result = await qn.uploadFile(fileName, filePath)
+  try {
+    const result = await qn.uploadFile(fileName, filePath)
 
-  if (!result.ok) {
-    return c.json({ message: 'Upload failed' }, HttpStatusCode.UNPROCESSABLE_ENTITY)
+    if (!result.ok) {
+      throw new Error('Upload failed')
+    }
+
+    const url = qn.getFileUrl(result.data?.key || fileName)
+    return c.json({ url }, HttpStatusCode.OK)
   }
-
-  const url = qn.getFileUrl(result.data?.key || fileName)
-  return c.json({ url }, HttpStatusCode.OK)
+  catch {
+    return c.json({
+      error: {
+        issues: [{
+          code: 'custom',
+          path: ['file'],
+          message: 'Upload failed',
+        }],
+        name: 'ZodError',
+      },
+      success: false,
+    }, HttpStatusCode.UNPROCESSABLE_ENTITY)
+  }
 }
