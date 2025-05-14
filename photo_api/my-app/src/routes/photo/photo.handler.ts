@@ -1,4 +1,6 @@
 import type { AppRouteHandler } from '@/lib/types'
+import type qiniu from 'qiniu'
+import type { StatObjectResult } from 'qiniu/StorageResponseInterface'
 import type {
   addImageRoute,
   bubuListRoute,
@@ -13,11 +15,9 @@ import type {
 } from './photo.routes'
 import { Buffer } from 'node:buffer'
 import fs from 'node:fs'
-import path from 'node:path'
-import process from 'node:process'
 import { db } from '@/db'
 import { bubu, users } from '@/db/schema'
-import qn, { reName } from '@/lib/qiniu'
+import qn, { DEFAULT_BUCKET, extractFilenameFromUrl, reName } from '@/lib/qiniu'
 import { eq, like } from 'drizzle-orm'
 import Jwt from 'jsonwebtoken'
 import { nanoid } from 'nanoid'
@@ -134,7 +134,15 @@ export const addImage: AppRouteHandler<addImageRoute> = async (c) => {
 
 export const deleteImage: AppRouteHandler<deleteImageRoute> = async (c) => {
   const { id } = c.req.valid('param')
+  // 根据id拿到七牛云图片链接
   const [image] = await db.delete(bubu).where(eq(bubu.id, id)).returning()
+  const { imgUrl } = image.source
+  const key = extractFilenameFromUrl(imgUrl)
+  console.log('key', key)
+  // 根据url去七牛云查找
+  const result: Promise<qiniu.httpc.ResponseWrapper<StatObjectResult>> = qn.getFileInfo('bubu0507')
+  console.log('result', (await result).data)
+  // qn.deleteFile(result.data result.key)
   if (!image) {
     return c.json({ message: 'Delete failed' }, HttpStatusCode.NOT_FOUND)
   }
@@ -197,31 +205,36 @@ export const uploadImageFile: AppRouteHandler<uploadImageFileRoute> = async (c) 
 
   const arrayBuffer = await file.arrayBuffer()
   const buffer = Buffer.from(arrayBuffer)
-  const filePath = path.join(process.cwd(), 'upload', reName(file.name))
+  const filePath = await qn.getFilePath(reName(file.name))
   await fs.writeFileSync(filePath, buffer)
   const fileName = reName(file.name)
 
   try {
     const result = await qn.uploadFile(fileName, filePath)
-
-    if (!result.ok) {
-      throw new Error('Upload failed')
+    if (result.data?.error) {
+      throw new Error(result.data.error)
     }
-
+    console.log('result.data?.key', result.data?.key)
     const url = qn.getFileUrl(result.data?.key || fileName)
+    fs.rmSync(filePath, { force: true })
     return c.json({ url }, HttpStatusCode.OK)
   }
-  catch {
+  catch (error) {
+    console.error('error', error)
     return c.json({
       error: {
         issues: [{
           code: 'custom',
           path: ['file'],
-          message: 'Upload failed',
+          message: error instanceof Error ? error.message : 'Upload failed',
         }],
         name: 'ZodError',
       },
       success: false,
     }, HttpStatusCode.UNPROCESSABLE_ENTITY)
   }
+}
+
+export const deleteFile: AppRouteHandler<deleteImageRoute> = async (c) => {
+  const { id } = c.req.valid('param')
 }

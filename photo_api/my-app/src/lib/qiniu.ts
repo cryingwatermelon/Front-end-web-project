@@ -1,10 +1,13 @@
+import fs from 'node:fs'
+import path from 'node:path'
+import process from 'node:process'
 import dayjs from 'dayjs'
 import qiniu from 'qiniu'
 import env from '../../env'
 
-const DEFAULT_BUCKET = 'bubu0507'
-const TOKEN_EXPIRE_TIME = 3600
-
+export const DEFAULT_BUCKET = 'bubu0507'
+const TOKEN_EXPIRE_TIME = 7200
+const UPLOAD_DIR = 'upload'
 class Qiniu {
   private mac: qiniu.auth.digest.Mac
   private putPolicy: qiniu.rs.PutPolicy
@@ -52,8 +55,30 @@ class Qiniu {
     return formUploader.putFile(token, key, filePath, putExtra)
   }
 
+  deleteFile(DEFAULT_BUCKET: string, key: string) {
+    return this.bucketManager.delete(DEFAULT_BUCKET, key).then(({ data, resp }) => {
+      if (resp.statusCode === 200) {
+        console.info('data', data)
+      }
+      else {
+        console.info('resp.statusCode', resp.statusCode)
+        console.info('resp.data', data)
+      }
+    }).catch((err) => {
+      console.error('err', err)
+    })
+  }
+
   getFileUrl(key: string) {
     return `${env.DOMAIN}/${key}`
+  }
+
+  async getFilePath(key: string) {
+    if (!await fs.existsSync(UPLOAD_DIR)) {
+      fs.mkdirSync(UPLOAD_DIR, { recursive: true })
+    }
+    const filePath = path.join(process.cwd(), UPLOAD_DIR, key)
+    return filePath
   }
 }
 
@@ -66,4 +91,22 @@ export function reName(tag: string) {
   const date = dayjs().valueOf()
   const name = `${date}_${tag}`
   return name
+}
+
+// 提取 URL 中的文件名
+/**
+ * 从 URL 中提取文件名
+ * @param url 完整的 URL 链接
+ * @returns 提取到的文件名
+ */
+export function extractFilenameFromUrl(url: string): string {
+  try {
+    const parsedUrl = new URL(url)
+    const pathname = parsedUrl.pathname
+    return decodeURIComponent(pathname.substring(pathname.lastIndexOf('/') + 1))
+  }
+  catch (e) {
+    console.error('无效的 URL:', url)
+    return ''
+  }
 }

@@ -222,3 +222,21 @@ export const uploadImageFile = createRoute({
   },
 })
 export type uploadImageFileRoute = typeof uploadImageFile
+
+// 从七牛云中删除图片
+// export const deleteImageFile = createRoute({
+//   path: '/{id}',
+//   method: 'delete',
+//   tags,
+//   request: {
+//     params: ImageIdParamsSchema,
+//   },
+//   responses: {
+//     [HttpStatusCode.OK]: { description: 'Delete successfully' },
+//     [HttpStatusCode.NOT_FOUND]: jsonContent(
+//       notFoundSchema,
+//       'The image ID is not exist',
+//     ),
+//   },
+// })
+// export type deleteImageFileRoute = typeof deleteImageFile

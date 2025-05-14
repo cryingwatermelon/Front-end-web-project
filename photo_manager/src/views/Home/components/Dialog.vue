@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-import type { imageItem } from '@/types/image';
-import type { InputInstance, UploadProps } from 'element-plus';
+import type { imageItem } from '@/types/image'
+import type { InputInstance, UploadProps } from 'element-plus'
 
+import Uploader from '@/components/Uploader.vue'
 
 const emit = defineEmits<{
   (e: 'updateImage', image: imageItem): void
@@ -11,7 +12,7 @@ const emit = defineEmits<{
 const inputValue = ref('')
 const inputVisible = ref(false)
 const ruleFormRef = ref()
-
+const uploaderRef = ref<InstanceType<typeof Uploader>>()
 const form = ref<imageItem>({
   name: '',
   source: '',
@@ -54,6 +55,7 @@ function showInput() {
 
 function resetForm() {
   ruleFormRef.value?.resetFields()
+  uploaderRef.value?.resetUploadResult()
 }
 
 function handleCancel() {
@@ -62,12 +64,6 @@ function handleCancel() {
 }
 
 function handleConfirm() {
-  // if (form.value.id === '') {
-  //   emit('addImage', form.value)
-  // }
-  // else {
-  //   emit('updateImage', form.value)
-  // }
   if (form.value.id?.length) {
     emit('updateImage', form.value)
   }
@@ -91,38 +87,24 @@ defineExpose({
   },
   close: () => dialogVisible.value = false,
 })
-const imageUrl = ref('')
+// const imageUrl = ref('')
 
-const handleAvatarSuccess: UploadProps['onSuccess'] = (
-  response,
-  uploadFile,
-) => {
-  imageUrl.value = URL.createObjectURL(uploadFile.raw!)
-}
-
-const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
-  if (rawFile.type !== 'image/jpeg') {
-    ElMessage.error('Avatar picture must be JPG format!')
-    return false
-  }
-  else if (rawFile.size / 1024 / 1024 > 2) {
-    ElMessage.error('Avatar picture size can not exceed 2MB!')
-    return false
-  }
-  return true
+// 拿到七牛云返回的链接
+function receiveUrl(url: string) {
+  form.value.source = url
 }
 </script>
 
 <template>
   <el-dialog v-model="dialogVisible" :title="title" width="50%" center @close="resetForm">
-    <el-form ref="ruleFormRef" :model="form" label-width="auto" class="w-full" :rules="rules">
-      <el-form-item label="名称" prop="name">
-        <el-input v-model="form.name" />
+    <el-form ref="ruleFormRef" :model="form" label-width="auto" class="w-full flex flex-col" :rules="rules">
+      <el-form-item label="名称" prop="name" label-position="left">
+        <el-input v-model="form.name" class="" />
       </el-form-item>
-      <el-form-item label="上传图片" prop="source" class="bg-yellow-200">
+      <el-form-item label="上传图片" prop="source">
         <!-- <el-input v-model="form.source" /> -->
-
-        <el-upload
+        <Uploader ref="uploaderRef" @upload-image="receiveUrl" />
+        <!-- <el-upload
           class="avatar-uploader"
           action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
           show-file-list
@@ -133,7 +115,7 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
           <el-icon v-else :src="imageUrl" class="avatar">
             <Icon :height="24" icon="material-symbols:add-2-rounded" class="bg-black" />
           </el-icon>
-        </el-upload>
+        </el-upload> -->
       </el-form-item>
       <el-form-item label="图片标签" prop="tags">
         <div class="flex gap-2 flex-wrap">

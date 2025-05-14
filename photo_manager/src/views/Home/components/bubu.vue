@@ -17,6 +17,7 @@ async function getBubuList() {
 }
 
 async function handleAddNewImage(form: imageItem) {
+  // console.log('form', form)
   await addImage(form)
   getBubuList()
 }
