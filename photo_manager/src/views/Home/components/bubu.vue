@@ -17,12 +17,10 @@ async function getBubuList() {
 }
 
 async function handleAddNewImage(form: imageItem) {
-  // console.log('form', form)
   await addImage(form)
   getBubuList()
 }
 async function handleEditImage(form: imageItem) {
-  // TODO editImage传入id
   const id = form.id
   await editImage(id!, form)
   getBubuList()

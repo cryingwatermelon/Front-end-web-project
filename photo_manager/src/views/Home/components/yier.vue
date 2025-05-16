@@ -13,6 +13,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif']
 
 async function handleFileChange(event: Event) {
   const target = event.target as HTMLInputElement
+
   const file = target.files?.[0]
 
   // 重置状态
@@ -20,21 +21,18 @@ async function handleFileChange(event: Event) {
   error.value = null
 
   if (!file) {
-    error.value = '请选择要上传的文件'
-    return
+    return error.value = '请选择要上传的文件'
   }
 
   // 文件类型验证
   if (!ALLOWED_TYPES.includes(file.type)) {
-    error.value = `不支持的文件类型，仅支持 ${ALLOWED_TYPES.join(', ')}`
-    return
+    return error.value = `不支持的文件类型，仅支持 ${ALLOWED_TYPES.join(', ')}`
   }
 
   // 文件大小验证（示例限制5MB）
   const MAX_SIZE = 5 * 1024 * 1024
   if (file.size > MAX_SIZE) {
-    error.value = `文件大小不能超过 ${MAX_SIZE / 1024 / 1024}MB`
-    return
+    return error.value = `文件大小不能超过 ${MAX_SIZE / 1024 / 1024}MB`
   }
 
   const formData = new FormData()
@@ -64,6 +62,8 @@ async function handleFileChange(event: Event) {
   }
   finally {
     isLoading.value = false
+    if (target)
+      target.value = ''
   }
 }
 </script>
@@ -77,8 +77,14 @@ async function handleFileChange(event: Event) {
         :disabled="isLoading"
         @change="handleFileChange"
       >
-      <span v-if="!isLoading">📤 选择图片</span>
-      <span v-else>⏳ 上传中...</span>
+      <!-- Loading 遮罩 -->
+      <div
+        v-if="isLoading"
+        class="absolute inset-0 bg-white/70 flex items-center justify-center z-10 rounded-lg"
+      >
+        <span class="text-gray-600 text-lg">⏳ 上传中...</span>
+      </div>
+
     </label>
 
     <!-- 状态反馈 -->

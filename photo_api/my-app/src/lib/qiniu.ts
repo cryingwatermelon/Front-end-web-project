@@ -80,6 +80,29 @@ class Qiniu {
     const filePath = path.join(process.cwd(), UPLOAD_DIR, key)
     return filePath
   }
+
+  // 数据流分片上传
+  uploadStream(key: string, stream: NodeJS.ReadableStream, streamLength: number, recordFilePath: string) {
+    const resumeUploader = new qiniu.resume_up.ResumeUploader(this.config)
+    const putExtra = new qiniu.resume_up.PutExtra()
+    putExtra.resumeKey = recordFilePath
+    putExtra.version = 'v2'
+    const token = this.getToken()
+    // 当使用分片上传 v2 时，默认分片大小为 4MB，也可自定义分片大小，单位为 Bytes。例如设置为 6MB
+    // putExtra.partSize = 6 * 1024 * 1024
+    resumeUploader.putStream(token, key, stream, streamLength, putExtra).then(({ data, resp }) => {
+      if (resp.statusCode === 200) {
+        console.info('data', data)
+      }
+      else {
+        console.info('resp.statusCode', resp.statusCode)
+        console.info('resp.data', data)
+      }
+    },
+    ).catch((err) => {
+      console.error('上传错误:', err)
+    })
+  }
 }
 
 const qn = new Qiniu(DEFAULT_BUCKET)
@@ -105,6 +128,7 @@ export function extractFilenameFromUrl(url: string): string {
     const pathname = parsedUrl.pathname
     return decodeURIComponent(pathname.substring(pathname.lastIndexOf('/') + 1))
   }
+  // eslint-disable-next-line unused-imports/no-unused-vars
   catch (e) {
     console.error('无效的 URL:', url)
     return ''

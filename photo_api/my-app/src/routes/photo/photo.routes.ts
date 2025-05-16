@@ -2,39 +2,19 @@ import {
   ImageIdParamsSchema,
   insertPhotoSchema,
   keywordParamsSchema,
-  loginSchema,
   patchImageInfoSchema,
-  patchUserInfoSchema,
-  registerSchema,
   selectPhotoSchema,
   tokenSchema,
   uploadImageFileResultSchema,
   uploadImageFileSchema,
-  userInfoSchema,
 } from '@/db/schema'
-import { notFoundSchema, unAuthorizedSchema } from '@/lib/constants'
+import { notFoundSchema } from '@/lib/constants'
 import { createRoute, z } from '@hono/zod-openapi'
 import * as HttpStatusCode from 'stoker/http-status-codes'
 import { jsonContent, jsonContentRequired } from 'stoker/openapi/helpers'
 import { createErrorSchema } from 'stoker/openapi/schemas'
 
 const tags = ['photo']
-export const login = createRoute({
-  path: '/login',
-  method: 'post',
-  tags,
-  request: {
-    body: jsonContentRequired(loginSchema, 'The login account information'),
-  },
-  responses: {
-    [HttpStatusCode.OK]: jsonContent(tokenSchema, 'Login successful'),
-    [HttpStatusCode.BAD_REQUEST]: jsonContent(
-      unAuthorizedSchema,
-      'username or password is incorrect',
-    ),
-    [HttpStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, 'user not found'),
-  },
-})
 
 export const list = createRoute({
   path: '/list',
@@ -52,64 +32,6 @@ export const list = createRoute({
     ),
   },
 })
-export type LoginRoute = typeof login
-
-export const userInfo = createRoute({
-  path: '/userInfo',
-  tags,
-  method: 'get',
-  request: {},
-  responses: {
-    [HttpStatusCode.OK]: jsonContent(userInfoSchema, 'User information'),
-    [HttpStatusCode.NOT_FOUND]: jsonContent(
-      notFoundSchema,
-      'Can not find any info through given username ',
-    ),
-  },
-})
-
-export const updateUserInfo = createRoute({
-  path: '/userInfo',
-  method: 'patch',
-  tags,
-  request: {
-    body: jsonContentRequired(
-      patchUserInfoSchema,
-      'The updated user information',
-    ),
-  },
-  responses: {
-    [HttpStatusCode.NO_CONTENT]: { description: 'update successfully' },
-    [HttpStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, 'User not found'),
-    [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(patchUserInfoSchema),
-      'The validation errors',
-    ),
-  },
-})
-export const register = createRoute({
-  path: '/register',
-  method: 'post',
-  tags,
-  request: {
-    body: jsonContentRequired(
-      registerSchema,
-      'The register account information',
-    ),
-  },
-  responses: {
-    [HttpStatusCode.NO_CONTENT]: {
-      description: 'Register successfully',
-    },
-    [HttpStatusCode.UNPROCESSABLE_ENTITY]: jsonContent(
-      createErrorSchema(registerSchema),
-      'The username is already exist',
-    ),
-  },
-})
-export type userInfoRoute = typeof userInfo
-export type patchUserInfoRoute = typeof updateUserInfo
-export type registerRoute = typeof register
 
 export const bubuList = createRoute({
   path: '/bubuList',
@@ -222,21 +144,3 @@ export const uploadImageFile = createRoute({
   },
 })
 export type uploadImageFileRoute = typeof uploadImageFile
-
-// 从七牛云中删除图片
-// export const deleteImageFile = createRoute({
-//   path: '/{id}',
-//   method: 'delete',
-//   tags,
-//   request: {
-//     params: ImageIdParamsSchema,
-//   },
-//   responses: {
-//     [HttpStatusCode.OK]: { description: 'Delete successfully' },
-//     [HttpStatusCode.NOT_FOUND]: jsonContent(
-//       notFoundSchema,
-//       'The image ID is not exist',
-//     ),
-//   },
-// })
-// export type deleteImageFileRoute = typeof deleteImageFile

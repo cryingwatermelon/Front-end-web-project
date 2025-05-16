@@ -76,8 +76,8 @@ function resetUploadResult() {
 </script>
 
 <template>
-  <div class="w-200 mx-auto mt-8 p-6 border border-gray-200 rounded-lg shadow-sm">
-    <label class="flex flex-col  block px-6 py-3 bg-gray-100 text-center rounded-md cursor-pointer hover:bg-gray-200 transition">
+  <div class="w-200 mx-auto mt-2 p-6 border border-gray-200 rounded-lg shadow-sm">
+    <div v-if="!uploadResult" class="w-full">
       <input
         type="file"
         class="opacity-0 w-full h-full cursor-pointer"
@@ -85,10 +85,11 @@ function resetUploadResult() {
         :disabled="isLoading"
         @change="handleFileChange"
       >
-      <span v-if="!isLoading" class="mb-4">📤 选择图片</span>
-      <span v-else>⏳ 上传中...</span>
-    </label>
-
+      <div>
+        <span v-if="!isLoading" class="flex center">📤 选择图片</span>
+        <span v-else class="flex center">⏳ 上传中...</span>
+      </div>
+    </div>
     <!-- 上传成功 -->
     <div v-if="uploadResult" class="mt-4 p-4 bg-green-50 text-green-700 rounded-md">
       ✅ 上传成功！
