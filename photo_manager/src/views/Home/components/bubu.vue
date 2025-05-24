@@ -62,6 +62,7 @@ async function searchByTag(tag: string) {
 }
 function clearSearchResult() {
   searchList.value = []
+  search.value = ''
 }
 
 const title = ref('')
@@ -82,8 +83,8 @@ function handleEdit(image: imageItem) {
     <!-- <img src="http://svuzwd4n0.hb-bkt.clouddn.com/bubu%E5%B0%B1%E4%BD%A0.gif" class="w-[100px] h-[100px] mb-2"> -->
     <!-- 顶部搜索和添加按钮 -->
     <div class="flex justify-between items-center w-full px-2 py-4">
-      <div class="flex flex-between items-center h-full w-1/4 border-pink-300 border-solid border-2 rounded-lg">
-        <el-input v-model="search" placeholder="搜索图片" />
+      <div class="flex justify-between items-center h-full min-w-60 border-pink-300 border-solid border-2 rounded-lg">
+        <el-input v-model="search" placeholder="搜索图片" outline="none" class="no-border-input" />
         <button class="w-10 h-10 flex center" @click="searchByTag(search)">
           <Icon :height="24" icon="iconamoon:search-bold" />
         </button>
@@ -130,7 +131,7 @@ function handleEdit(image: imageItem) {
     <div v-else>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 p-2 ">
         <div
-          v-for="image in showList"
+          v-for="image in searchList"
           :key="image.id"
           class="bg-pink-100 border-2 border-pink-200 rounded-2xl shadow-md px-3 transition-transform transform hover:scale-105 hover:shadow-lg"
         >
@@ -177,5 +178,15 @@ function handleEdit(image: imageItem) {
 ::-webkit-scrollbar-thumb {
   background-color: #FBCFE8; // Tailwind 的 pink-300
   border-radius: 9999px;
+}
+.no-border-input :deep(.el-input__inner) {
+  border: none !important;
+  box-shadow: none !important;
+  outline:none !important;
+}
+.no-border-input:deep(.el-input__wrapper) {
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent; /* 可选，视你背景颜色而定 */
 }
 </style>

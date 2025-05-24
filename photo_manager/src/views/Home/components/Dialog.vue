@@ -1,8 +1,7 @@
 <script lang="ts" setup>
+import type Uploader from '@/components/Uploader.vue'
 import type { imageItem } from '@/types/image'
-import type { InputInstance, UploadProps } from 'element-plus'
-
-import Uploader from '@/components/Uploader.vue'
+import type { InputInstance } from 'element-plus'
 
 const emit = defineEmits<{
   (e: 'updateImage', image: imageItem): void
@@ -19,8 +18,10 @@ const form = ref<imageItem>({
   tags: [],
   category: 1,
 })
-const title = computed(() => form.value.name === '' ? '添加图片' : '编辑图片')
-
+const isEditMode = ref(false)
+const title = computed(() => {
+  return isEditMode.value ? '编辑图片' : '添加图片'
+})
 const rules = reactive({
   name: [
     { required: true, message: '请输入名称', trigger: 'blur' },
@@ -56,6 +57,7 @@ function showInput() {
 function resetForm() {
   ruleFormRef.value?.resetFields()
   uploaderRef.value?.resetUploadResult()
+  isEditMode.value = false
 }
 
 function handleCancel() {
@@ -76,6 +78,7 @@ function handleConfirm() {
 defineExpose({
   open: (image?: imageItem) => {
     dialogVisible.value = true
+    isEditMode.value = !!image
     if (image) {
       nextTick(() => {
         // Object.assign(form.value, image)
@@ -93,6 +96,9 @@ defineExpose({
 function receiveUrl(url: string) {
   form.value.source = url
 }
+function evokeUploader() {
+  uploaderRef.value?.openUploadDialog()
+}
 </script>
 
 <template>
@@ -102,21 +108,19 @@ function receiveUrl(url: string) {
         <el-input v-model="form.name" class="" />
       </el-form-item>
       <el-form-item label="上传图片" prop="source">
-        <!-- <el-input v-model="form.source" /> -->
-        <Uploader ref="uploaderRef" @upload-image="receiveUrl" />
-        <!-- <el-upload
-          class="avatar-uploader"
-          action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-          show-file-list
-          :on-success="handleAvatarSuccess"
-          :before-upload="beforeAvatarUpload"
-        >
-          <img v-if="imageUrl" :src="imageUrl" class="avatar">
-          <el-icon v-else :src="imageUrl" class="avatar">
-            <Icon :height="24" icon="material-symbols:add-2-rounded" class="bg-black" />
-          </el-icon>
-        </el-upload> -->
+        <div v-if="form.source" class="relative w-full group">
+          <img :src="form.source" alt="图片" class="w-full object-cover rounded">
+          <div
+            class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300 rounded cursor-pointer"
+          >
+            <el-button type="primary" size="small" @click="evokeUploader()">
+              替换图片
+            </el-button>
+          </div>
+        </div>
+        <Uploader ref="uploaderRef" :class="form.source && 'hidden'" @upload-image="receiveUrl" />
       </el-form-item>
+
       <el-form-item label="图片标签" prop="tags">
         <div class="flex gap-2 flex-wrap">
           <el-tag v-for="(tag, tagIndex) in form.tags" :key="tag" :type="tagType[tagIndex % 4]" closable @close="deleteTag(tag)">

@@ -8,8 +8,9 @@ const emit = defineEmits<{
 }>()
 defineExpose({
   resetUploadResult,
+  openUploadDialog,
 })
-
+const fileInputRef = ref<HTMLInputElement | null>(null)
 const uploadResult = ref<{ url: string } | null>(null)
 const error = ref<string | null>(null)
 const isLoading = ref(false)
@@ -66,6 +67,7 @@ async function handleFileChange(event: Event) {
   }
   finally {
     isLoading.value = false
+    resetUploadResult()
   }
 }
 
@@ -73,12 +75,17 @@ function resetUploadResult() {
   uploadResult.value = null
   error.value = null
 }
+
+function openUploadDialog() {
+  fileInputRef.value?.click()
+}
 </script>
 
 <template>
-  <div class="w-200 mx-auto mt-2 p-6 border border-gray-200 rounded-lg shadow-sm">
+  <div class="min-w-60 mx-auto mt-2 p-6 border border-gray-200 rounded-lg shadow-sm">
     <div v-if="!uploadResult" class="w-full">
       <input
+        ref="fileInputRef"
         type="file"
         class="opacity-0 w-full h-full cursor-pointer"
         :accept="ALLOWED_TYPES.toString()"
